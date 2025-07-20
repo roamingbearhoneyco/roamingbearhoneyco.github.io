@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+body {
+  background-color: #fff8ef;
+  background-blend-mode: soft-light;
+  background-size: cover;
+  color: #2C1C0F; /* brand.dark */
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+a {
+  transition-property: color;
+  transition-duration: 200ms;
+}
+a:hover {
+  opacity: 0.8;
+}

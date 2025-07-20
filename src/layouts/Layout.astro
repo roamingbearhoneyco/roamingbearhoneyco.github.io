@@ -1,22 +1,37 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+import '../styles/global.css';
+---
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roaming Bear Honey Co.</title>
+  </head>
+  <body class="bg-[#fff8ef] text-gray-900 font-sans">
+    <header class="sticky top-0 bg-[#d7af79] shadow-md z-50">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <a href="/" class="flex items-center space-x-3">
+      <span class="text-2xl font-bold text-[#1d1d1b] hidden sm:inline">Roaming Bear Honey Co.</span>
+    </a>
+    <nav class="space-x-6 text-[#1d1d1b] font-medium">
+      <a href="/" class="hover:text-[#a05d35]">Home</a>
+      <a href="/about" class="hover:text-[#a05d35]">About</a>
+      <a href="/blog" class="hover:text-[#a05d35]">Blog</a>
+      <a href="/shop" class="hover:text-[#a05d35]">Shop</a>
+      <a href="/portal" class="hover:text-[#a05d35]">Portal</a>
+    </nav>
+  </div>
+</header>
+
+
+
+    <main class="p-0">
+      <slot />
+    </main>
+
+    <footer class="relative z-50 bg-[#fff8ef] py-1 px-12 p-1000 mt-12 text-sm text-center text-gray-500">
+      &copy; 2025 Roaming Bear Honey Co. All rights reserved.
+    </footer>
+  </body>
+</html>

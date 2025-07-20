@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <div class="p-10 max-w-3xl mx-auto space-y-12">
+
+    <header class="sticky top-0 bg-yellow-300 p-4 text-center font-bold z-50 shadow">
+      Sticky Header (position: sticky; top: 0)
+    </header>
+
+    <section class="relative bg-blue-300 p-6 rounded shadow">
+      <h2 class="text-2xl font-semibold mb-2">Relative</h2>
+      <p>This container is <code>position: relative</code>. The orange box inside is <code>position: absolute</code> and positioned relative to this box.</p>
+      <div class="absolute top-4 right-4 bg-orange-500 text-white font-bold px-3 py-1 rounded shadow">
+        Absolute inside relative
+      </div>
+    </section>
+
+    <section class="bg-green-300 p-6 rounded shadow h-48 relative">
+      <h2 class="text-2xl font-semibold mb-2">Fixed</h2>
+      <p>This green box has a <code>position: fixed</code> purple box inside it, which stays fixed relative to the viewport as you scroll.</p>
+      <div class="fixed bottom-10 left-10 bg-purple-700 text-white font-bold px-3 py-1 rounded shadow">
+        Fixed Box
+      </div>
+      <p class="mt-20">Scroll down to see it stay fixed in place.</p>
+    </section>
+
+    <section class="bg-pink-300 p-6 rounded shadow h-64 overflow-auto">
+      <h2 class="text-2xl font-semibold mb-2">Sticky</h2>
+      <p>The pink box contains a header with <code>position: sticky; top: 0;</code>. It sticks to the top of the pink box's scroll area.</p>
+      <div class="sticky top-0 bg-pink-600 text-white font-bold px-3 py-4 rounded shadow">
+        Sticky inside pink container
+      </div>
+      <div class="mt-6 space-y-4 max-h-40 overflow-auto">
+        <p>Lots of content here to scroll...</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <p>Vivamus luctus urna sed urna ultricies ac tempor dui sagittis.</p>
+        <p>In condimentum facilisis porta.</p>
+        <p>Sed nec diam eu diam mattis viverra.</p>
+        <p>Nulla fringilla, orci ac euismod semper.</p>
+        <p>Proin aliquam facilisis ante interdum congue.</p>
+        <p>Integer ac ipsum at libero tincidunt pellentesque.</p>
+        <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;</p>
+        <p>Praesent ut ligula non mi varius sagittis.</p>
+      </div>
+    </section>
+
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-2xl font-semibold mb-2">Normal flow</h2>
+      <p>This is normal content flow with no special positioning.</p>
+    </section>
+
+  </div>
+</Layout>

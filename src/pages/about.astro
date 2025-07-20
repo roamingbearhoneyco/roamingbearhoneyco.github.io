@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <!-- Fixed Background Image Layer -->
+  <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/roaming-bear-bg.png');"></div>
+
+  <!-- Gradient Overlay Layer -->
+  <div class="fixed inset-0 z-10 bg-gradient-to-b from-[#f5e7d0]/60 to-[#d7af79]/0"></div>
+
+  <!-- Hero Section -->
+  <section class="relative z-20 h-[90vh] flex flex-col justify-center items-center text-center px-4 text-[#1d1d1b] animate-fade-in-up">
+    <h1 class="text-5xl sm:text-6xl font-extrabold mb-4 leading-tight drop-shadow-md">
+      About Roaming Bear Honey Co.
+    </h1>
+    <p class="max-w-2xl text-xl sm:text-2xl font-medium text-[#3e2e1d]">
+      Where wild honey meets community, conservation, and story.
+    </p>
+  </section>
+
+  <!-- Scrollable Content Section -->
+  <section class="relative z-30 py-20 px-2 sm:px-6 text-[#1d1d1b]">
+    <div class="relative max-w-7xl mx-auto flex flex-col gap-16">
+      <!-- Top Section: Two Cards Left, Image Right -->
+      <div class="flex flex-col md:flex-row items-center md:items-stretch gap-8">
+        <div class="flex-1 flex flex-col gap-8 justify-center">
+          <!-- Origin Story Tile -->
+          <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 border border-[#f5e7d0] hover:shadow-3xl transition-shadow duration-300">
+            <h2 class="text-3xl font-bold mb-2">Rooted in Nature</h2>
+            <p class="mt-4 text-lg leading-relaxed">
+              Roaming Bear Honey Co. began with a simple belief: that the power of wild bees, untamed forests, and local stewardship can shape a sweeter future. As an entrepreneur and conservationist, Justin saw honey not just as a product, but as a storyteller — a golden thread woven from nature's resilience.
+            </p>
+          </div>
+          <!-- Mission Tile -->
+          <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 border border-[#f5e7d0] hover:shadow-3xl transition-shadow duration-300">
+            <h2 class="text-3xl font-bold mb-2">Our Mission</h2>
+            <p class="mt-4 text-lg leading-relaxed">
+              We exist to reconnect people with the land, the bees, and each other. Every jar of Roaming Bear honey supports sustainable apiary practices, educational outreach, and rewilding efforts. This isn’t just about saving bees — it’s about creating a culture that thrives alongside them.
+            </p>
+          </div>
+        </div>
+        <!-- Beekeeper Image Right -->
+        <div class="flex-shrink-0 flex justify-center items-center md:pl-8">
+          <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-0 w-80 h-96 flex items-stretch overflow-hidden">
+            <img
+              src="/assets/beekeeper.png"
+              alt="Beekeeper"
+              class="object-cover w-full h-full rounded-2xl"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Section: Image Left, Cards & CTA Stacked Right -->
+      <div class="flex flex-col md:flex-row items-center md:items-stretch gap-8">
+        <!-- Beekeeper Image Left -->
+        <div class="flex-shrink-0 flex justify-center md:pr-8 order-2 md:order-1 h-full mt-2 md:mt-4">
+          <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-0 w-80 h-96 flex items-stretch overflow-hidden">
+            <img
+              src="/assets/adopt-us-bees.png"
+              alt="Beekeeper"
+              class="object-cover w-full h-full rounded-2xl"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <!-- Stacked Cards and CTA -->
+        <div class="flex-1 flex flex-col gap-8 order-1 md:order-2">
+          <!-- Brand Voice Tile -->
+          <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 border border-[#f5e7d0] hover:shadow-3xl transition-shadow duration-300">
+            <h2 class="text-3xl font-bold mb-2">The Wild Behind the Brand</h2>
+            <p class="mt-4 text-lg leading-relaxed">
+              The “roaming bear” is more than a namesake — it’s a spirit guide. He’s curious, grounded, protective. Like him, we wander with purpose, bringing bold flavors and bold ideas wherever we go. We craft content, host podcasts, and connect through storytelling — all to bring people closer to the heart of the hive.
+            </p>
+          </div>
+          <!-- Community Impact Tile -->
+          <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 border border-[#f5e7d0] hover:shadow-3xl transition-shadow duration-300">
+            <h2 class="text-3xl font-bold mb-2">Community-Driven</h2>
+            <p class="mt-4 text-lg leading-relaxed">
+              Our adoption tiers, educational content, and outreach efforts are built to unite local keepers, curious learners, and honey lovers alike. Whether you're discovering bee facts on social media or tasting the forest through your first spoonful, you're part of something bigger.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- CTA -->
+          <div class="text-center mt-4">
+            <a href="/portal" class="inline-block px-8 py-4 rounded-lg bg-[#1d1d1b] text-white text-lg font-semibold tracking-wide hover:bg-[#a05d35] hover:scale-105 shadow-lg transition-transform duration-300 ease-in-out">
+              Join the Hive
+            </a>
+          </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+  /* Responsive tweaks for better stacking and spacing */
+  @media (max-width: 1024px) {
+    .w-80, .h-96 {
+      width: 16rem !important;
+      height: 18rem !important;
+    }
+  }
+  @media (max-width: 768px) {
+    .w-80, .h-96 {
+      width: 100% !important;
+      height: auto !important;
+    }
+  }
+</style>
