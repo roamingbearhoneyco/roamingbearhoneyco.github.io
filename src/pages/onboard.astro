@@ -5,42 +5,49 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-  <form id="signup-form" novalidate>
-    <h2 class="form-title">Join the Hive</h2>
-    <div class="form-group">
-      <label for="name">Name<span class="required">*</span></label>
-      <input type="text" id="name" name="name" required autocomplete="name" />
-      <span class="error-message" id="name-error"></span>
-    </div>
-    <div class="form-group">
-      <label for="email">Email<span class="required">*</span></label>
-      <input type="email" id="email" name="email" required autocomplete="email" />
-      <span class="error-message" id="email-error"></span>
-    </div>
-    <div class="form-group">
-      <label for="address">Shipping Address<span class="required">*</span></label>
-      <textarea id="address" name="address" rows="3" required autocomplete="street-address"></textarea>
-      <span class="error-message" id="address-error"></span>
-    </div>
-    <div class="form-group">
-      <label for="tier">Subscription Tier<span class="required">*</span></label>
-      <select id="tier" name="tier" required>
-        <option value="">Select a tier</option>
-        {subscriptionTiers.map(tier => <option value={tier}>{tier}</option>)}
-      </select>
-      <span class="error-message" id="tier-error"></span>
-    </div>
-    <div class="form-group">
-      <label for="billing">Billing Frequency<span class="required">*</span></label>
-      <select id="billing" name="billing" required>
-        <option value="">Select frequency</option>
-        {billingFrequencies.map(freq => <option value={freq}>{freq}</option>)}
-      </select>
-      <span class="error-message" id="billing-error"></span>
-    </div>
-    <button type="submit" class="submit-btn">Sign Up</button>
-    <div id="form-success" class="success-message" style="display:none;">Thank you for joining! 🐻🍯</div>
-  </form>
+  <!-- Fixed Background Image Layer -->
+  <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/bear_with hive_.png');"></div>
+  <!-- Gradient Overlay Layer -->
+  <div class="fixed inset-0 z-10 bg-gradient-to-b from-[#f5e7d0]/0 to-[#d7af79]/40"></div>
+
+  <div class="relative z-20 flex justify-center items-start min-h-[100vh] pt-24 pb-16 px-2">
+    <form id="signup-form" novalidate class="modern-glass-form">
+      <h2 class="form-title">Join the Hive</h2>
+      <div class="form-group">
+        <label for="name">Name<span class="required">*</span></label>
+        <input type="text" id="name" name="name" required autocomplete="name" />
+        <span class="error-message" id="name-error"></span>
+      </div>
+      <div class="form-group">
+        <label for="email">Email<span class="required">*</span></label>
+        <input type="email" id="email" name="email" required autocomplete="email" />
+        <span class="error-message" id="email-error"></span>
+      </div>
+      <div class="form-group">
+        <label for="address">Shipping Address<span class="required">*</span></label>
+        <textarea id="address" name="address" rows="3" required autocomplete="street-address"></textarea>
+        <span class="error-message" id="address-error"></span>
+      </div>
+      <div class="form-group">
+        <label for="tier">Subscription Tier<span class="required">*</span></label>
+        <select id="tier" name="tier" required>
+          <option value="">Select a tier</option>
+          {subscriptionTiers.map(tier => <option value={tier}>{tier}</option>)}
+        </select>
+        <span class="error-message" id="tier-error"></span>
+      </div>
+      <div class="form-group">
+        <label for="billing">Billing Frequency<span class="required">*</span></label>
+        <select id="billing" name="billing" required>
+          <option value="">Select frequency</option>
+          {billingFrequencies.map(freq => <option value={freq}>{freq}</option>)}
+        </select>
+        <span class="error-message" id="billing-error"></span>
+      </div>
+      <button type="submit" class="submit-btn">Sign Up</button>
+      <div id="form-success" class="success-message" style="display:none;">Thank you for joining! 🐻🍯</div>
+    </form>
+  </div>
 
   <script type="module">
     const form = document.getElementById('signup-form');
@@ -92,17 +99,33 @@ import Layout from '../layouts/Layout.astro';
   </script>
 
   <style scoped>
-  form {
-    background: #fff8ef;
-    border-radius: 1.25rem;
-    box-shadow: 0 4px 24px 0 rgba(44,28,15,0.08);
-    max-width: 420px;
-    margin: 2rem auto;
-    padding: 2rem 1.5rem;
+  .modern-glass-form {
+    /* 20% wider than previous (1080px * 1.2 = 1296px) */
+    max-width: 1296px;
+    width: 100%;
+    margin: 0 auto;
+    /* ...existing code... */
+    background: linear-gradient(120deg, rgba(255,248,239,0.28) 60%, rgba(245,231,208,0.13) 100%);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border-radius: 1.5rem;
+    border: 1.5px solid rgba(215,175,121,0.10);
+    box-shadow: 0 4px 24px 0 rgba(44,28,15,0.07), 0 1.5px 8px 0 rgba(160,93,53,0.04);
+    padding: 2.2rem 2.5rem 1.7rem 2.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    border: 1px solid #f5e7d0;
+    gap: 1.15rem;
+    transition: box-shadow 0.2s, background 0.2s;
+  }
+  .modern-glass-form:focus-within {
+    /* ...existing code... */
+  }
+  /* Lower the card to 50% down the page */
+  .relative.z-20 {
+    align-items: flex-start;
+    padding-top: 60vh;
+    padding-bottom: 6vh;
+    min-height: 100vh;
   }
   .form-title {
     font-size: 2rem;
@@ -111,6 +134,10 @@ import Layout from '../layouts/Layout.astro';
     text-align: center;
     margin-bottom: 0.5rem;
     letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #d7af79 0%, #a05d35 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   .form-group {
     display: flex;
@@ -131,18 +158,19 @@ import Layout from '../layouts/Layout.astro';
     border-radius: 0.75rem;
     padding: 0.75rem 1rem;
     font-size: 1rem;
-    background: #fff;
+    background: rgba(255,255,255,0.32);
     color: #2c1c0f;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background 0.2s;
     outline: none;
+    box-shadow: 0 1px 4px 0 rgba(215,175,121,0.03);
   }
   input:focus, select:focus, textarea:focus {
     border-color: #a05d35;
-    background: #fff8ef;
+    background: rgba(255,248,239,0.55);
   }
   .input-error {
     border-color: #d97706 !important;
-    background: #fff7e6;
+    background: rgba(255,247,230,0.45);
   }
   .error-message {
     color: #d97706;
@@ -151,13 +179,14 @@ import Layout from '../layouts/Layout.astro';
   }
   .success-message {
     color: #388e3c;
-    background: #f5e7d0;
+    background: rgba(245,231,208,0.55);
     border-radius: 0.75rem;
     padding: 0.75rem 1rem;
     margin-top: 1rem;
     text-align: center;
     font-weight: 600;
     font-size: 1.1em;
+    box-shadow: 0 1px 6px 0 rgba(56,142,60,0.05);
   }
   .submit-btn {
     background: linear-gradient(90deg, #d7af79 0%, #a05d35 100%);
@@ -170,19 +199,30 @@ import Layout from '../layouts/Layout.astro';
     margin-top: 0.5rem;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
-    box-shadow: 0 2px 8px 0 rgba(160,93,53,0.08);
+    box-shadow: 0 2px 8px 0 rgba(160,93,53,0.06);
   }
   .submit-btn:hover, .submit-btn:focus {
     background: linear-gradient(90deg, #a05d35 0%, #d7af79 100%);
     transform: scale(1.03);
   }
+  @media (max-width: 800px) {
+    .modern-glass-form {
+      max-width: 98vw;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
   @media (max-width: 600px) {
-    form {
+    .modern-glass-form {
       padding: 1.2rem 0.5rem;
       max-width: 98vw;
     }
     .form-title {
       font-size: 1.4rem;
+    }
+    .relative.z-20 {
+      padding-top: 2.5rem;
+      padding-bottom: 1.5rem;
     }
   }
   </style>
