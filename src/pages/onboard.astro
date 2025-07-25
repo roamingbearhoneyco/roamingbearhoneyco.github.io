@@ -5,29 +5,41 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-  <!-- Fixed Background Image Layer -->
   <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/bear_with hive_.png');"></div>
-  <!-- Gradient Overlay Layer -->
   <div class="fixed inset-0 z-10 bg-gradient-to-b from-[#f5e7d0]/0 to-[#d7af79]/40"></div>
 
   <div class="relative z-20 flex justify-center items-start min-h-[100vh] pt-24 pb-16 px-2">
     <form id="signup-form" novalidate class="modern-glass-form">
       <h2 class="form-title">Join the Hive</h2>
+
+      <!-- Name -->
       <div class="form-group">
         <label for="name">Name<span class="required">*</span></label>
         <input type="text" id="name" name="name" required autocomplete="name" />
         <span class="error-message" id="name-error"></span>
       </div>
+
+      <!-- Email -->
       <div class="form-group">
         <label for="email">Email<span class="required">*</span></label>
         <input type="email" id="email" name="email" required autocomplete="email" />
         <span class="error-message" id="email-error"></span>
       </div>
+
+      <!-- Address (Split into 4 inputs) -->
       <div class="form-group">
-        <label for="address">Shipping Address<span class="required">*</span></label>
-        <textarea id="address" name="address" rows="3" required autocomplete="street-address"></textarea>
-        <span class="error-message" id="address-error"></span>
+        <label>Shipping Address<span class="required">*</span></label>
+        <input type="text" id="street" name="street" required autocomplete="street-address" placeholder="123 Bee Hollow Rd" />
+        <span class="error-message" id="street-error"></span>
+        <input type="text" id="city" name="city" required autocomplete="address-level2" placeholder="City" />
+        <span class="error-message" id="city-error"></span>
+        <input type="text" id="state" name="state" required autocomplete="address-level1" placeholder="State" />
+        <span class="error-message" id="state-error"></span>
+        <input type="text" id="zip" name="zip" required autocomplete="postal-code" placeholder="ZIP Code" />
+        <span class="error-message" id="zip-error"></span>
       </div>
+
+      <!-- Tier -->
       <div class="form-group">
         <label for="tier">Subscription Tier<span class="required">*</span></label>
         <select id="tier" name="tier" required>
@@ -36,6 +48,8 @@ import Layout from '../layouts/Layout.astro';
         </select>
         <span class="error-message" id="tier-error"></span>
       </div>
+
+      <!-- Billing -->
       <div class="form-group">
         <label for="billing">Billing Frequency<span class="required">*</span></label>
         <select id="billing" name="billing" required>
@@ -44,6 +58,7 @@ import Layout from '../layouts/Layout.astro';
         </select>
         <span class="error-message" id="billing-error"></span>
       </div>
+
       <button type="submit" class="submit-btn">Sign Up</button>
       <div id="form-success" class="success-message" style="display:none;">Thank you for joining! 🐻🍯</div>
     </form>
@@ -51,11 +66,14 @@ import Layout from '../layouts/Layout.astro';
 
   <script type="module">
     const form = document.getElementById('signup-form');
-    const fields = ['name', 'email', 'address', 'tier', 'billing'];
+    const fields = ['name', 'email', 'street', 'city', 'state', 'zip', 'tier', 'billing'];
     const errorMessages = {
       name: "Please enter your name.",
       email: "Please enter a valid email.",
-      address: "Please enter your shipping address.",
+      street: "Please enter your street address.",
+      city: "Please enter your city.",
+      state: "Please enter your state.",
+      zip: "Please enter your ZIP code.",
       tier: "Please select a subscription tier.",
       billing: "Please select a billing frequency."
     };
@@ -75,6 +93,7 @@ import Layout from '../layouts/Layout.astro';
           input.classList.remove('input-error');
         }
       });
+
       if (valid) {
         const data = {};
         fields.forEach(f => data[f] = form[f].value.trim());
@@ -99,131 +118,92 @@ import Layout from '../layouts/Layout.astro';
   </script>
 
   <style scoped>
-  .modern-glass-form {
-    /* 20% wider than previous (1080px * 1.2 = 1296px) */
-    max-width: 1296px;
-    width: 100%;
-    margin: 0 auto;
-    /* ...existing code... */
-    background: linear-gradient(120deg, rgba(255,248,239,0.28) 60%, rgba(245,231,208,0.13) 100%);
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    border-radius: 1.5rem;
-    border: 1.5px solid rgba(215,175,121,0.10);
-    box-shadow: 0 4px 24px 0 rgba(44,28,15,0.07), 0 1.5px 8px 0 rgba(160,93,53,0.04);
-    padding: 2.2rem 2.5rem 1.7rem 2.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.15rem;
-    transition: box-shadow 0.2s, background 0.2s;
-  }
-  .modern-glass-form:focus-within {
-    /* ...existing code... */
-  }
-  /* Lower the card to 50% down the page */
-  .relative.z-20 {
-    align-items: flex-start;
-    padding-top: 60vh;
-    padding-bottom: 6vh;
-    min-height: 100vh;
-  }
-  .form-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #a05d35;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.5px;
-    background: linear-gradient(90deg, #d7af79 0%, #a05d35 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  label {
-    font-weight: 600;
-    color: #3e2e1d;
-    margin-bottom: 0.1rem;
-  }
-  .required {
-    color: #d97706;
-    margin-left: 0.2em;
-  }
-  input, select, textarea {
-    border: 1.5px solid #e2c79e;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    background: rgba(255,255,255,0.32);
-    color: #2c1c0f;
-    transition: border-color 0.2s, background 0.2s;
-    outline: none;
-    box-shadow: 0 1px 4px 0 rgba(215,175,121,0.03);
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color: #a05d35;
-    background: rgba(255,248,239,0.55);
-  }
-  .input-error {
-    border-color: #d97706 !important;
-    background: rgba(255,247,230,0.45);
-  }
-  .error-message {
-    color: #d97706;
-    font-size: 0.95em;
-    min-height: 1.2em;
-  }
-  .success-message {
-    color: #388e3c;
-    background: rgba(245,231,208,0.55);
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-    margin-top: 1rem;
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.1em;
-    box-shadow: 0 1px 6px 0 rgba(56,142,60,0.05);
-  }
-  .submit-btn {
-    background: linear-gradient(90deg, #d7af79 0%, #a05d35 100%);
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.1rem;
-    border: none;
-    border-radius: 0.75rem;
-    padding: 0.85rem 0;
-    margin-top: 0.5rem;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    box-shadow: 0 2px 8px 0 rgba(160,93,53,0.06);
-  }
-  .submit-btn:hover, .submit-btn:focus {
-    background: linear-gradient(90deg, #a05d35 0%, #d7af79 100%);
-    transform: scale(1.03);
-  }
-  @media (max-width: 800px) {
     .modern-glass-form {
-      max-width: 98vw;
-      padding-left: 1rem;
-      padding-right: 1rem;
+      max-width: 1296px;
+      width: 100%;
+      margin: 0 auto;
+      background: linear-gradient(120deg, rgba(255,248,239,0.28) 60%, rgba(245,231,208,0.13) 100%);
+      backdrop-filter: blur(24px) saturate(1.4);
+      -webkit-backdrop-filter: blur(24px) saturate(1.4);
+      border-radius: 1.5rem;
+      border: 1.5px solid rgba(215,175,121,0.10);
+      box-shadow: 0 4px 24px 0 rgba(44,28,15,0.07), 0 1.5px 8px 0 rgba(160,93,53,0.04);
+      padding: 2.2rem 2.5rem 1.7rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+      transition: box-shadow 0.2s, background 0.2s;
     }
-  }
-  @media (max-width: 600px) {
-    .modern-glass-form {
-      padding: 1.2rem 0.5rem;
-      max-width: 98vw;
-    }
-    .form-title {
-      font-size: 1.4rem;
-    }
+
     .relative.z-20 {
-      padding-top: 2.5rem;
-      padding-bottom: 1.5rem;
+      align-items: flex-start;
+      padding-top: 60vh;
+      padding-bottom: 6vh;
+      min-height: 100vh;
     }
-  }
-  </style>
-</Layout>
+
+    .form-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #a05d35;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #d7af79 0%, #a05d35 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .form-group input[type="text"] {
+      width: 100%;
+      margin-bottom: 0.35rem;
+    }
+
+    label {
+      font-weight: 600;
+      color: #3e2e1d;
+      margin-bottom: 0.1rem;
+    }
+
+    .required {
+      color: #d97706;
+      margin-left: 0.2em;
+    }
+
+    input, select, textarea {
+      border: 1.5px solid #e2c79e;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.32);
+      color: #2c1c0f;
+      transition: border-color 0.2s, background 0.2s;
+      outline: none;
+      box-shadow: 0 1px 4px 0 rgba(215,175,121,0.03);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #a05d35;
+      background: rgba(255,248,239,0.55);
+    }
+
+    .input-error {
+      border-color: #d97706 !important;
+      background: rgba(255,247,230,0.45);
+    }
+
+    .error-message {
+      color: #d97706;
+      font-size: 0.95em;
+      min-height: 1.2em;
+    }
+
+    .success-message {
+      color: #388
