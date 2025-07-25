@@ -10,41 +10,112 @@ import '../styles/global.css';
   </head>
   <body class="font-sans">
     <header class="sticky top-0 bg-[#19360e] shadow-md z-50">
-  <div class="py-3 px-4 sm:px-8 flex justify-between items-center">
-    <a href="/" class="flex items-center space-x-3">
-      <span class="text-2xl font-bold text-[#ffffff] hidden sm:inline">Roaming Bear Honey Co.</span>
-    </a>
-    <nav class="space-x-3 sm:space-x-6 text-[#ffffff] font-medium">
-      <a href="/" class="hover:text-[#a05d35]">Home</a>
-      <a href="/about" class="hover:text-[#a05d35]">About</a>
-      <a href="/blog" class="hover:text-[#a05d35]">Blog</a>
-      <a href="/shop" class="hover:text-[#a05d35]">Shop</a>
-      <a href="/portal" class="hover:text-[#a05d35]">Portal</a>
-      <a href="/onboard" class="hover:text-[#a05d35]">Onboard</a>
-    </nav>
-  </div>
-</header>
+      <div class="py-3 px-4 sm:px-8 flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-3">
+          <span class="text-2xl font-bold text-[#ffffff] ">
+            Roaming Bear Honey Co.
+          </span>
+        </a>
+
+        <!-- Hamburger Toggle -->
+        <button id="menu-toggle" class="sm:hidden focus:outline-none text-white">
+          <svg
+            id="menu-icon"
+            class="w-6 h-6 transition-all duration-300 ease-in-out"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path id="line1" d="M3 6h18" />
+            <path id="line2" d="M3 12h18" />
+            <path id="line3" d="M3 18h18" />
+          </svg>
+        </button>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden sm:flex space-x-3 sm:space-x-6 text-[#ffffff] font-medium">
+          <a href="/" class="hover:text-[#a05d35]">Home</a>
+          <a href="/about" class="hover:text-[#a05d35]">About</a>
+          <a href="/blog" class="hover:text-[#a05d35]">Blog</a>
+          <a href="/shop" class="hover:text-[#a05d35]">Shop</a>
+          <a href="/portal" class="hover:text-[#a05d35]">Portal</a>
+          <a href="/onboard" class="hover:text-[#a05d35]">Onboard</a>
+        </nav>
+      </div>
+
+      <!-- Mobile Nav (Honeycomb Reveal) -->
+      <nav
+        id="mobile-menu"
+        class="sm:hidden hidden flex flex-col space-y-2 px-4 pb-4 text-[#ffffff] font-medium bg-[#19360e] shadow-md transition-all duration-300 ease-in-out transform scale-y-0 origin-top"
+      >
+        <a href="/" class="hover:text-[#a05d35]">Home</a>
+        <a href="/about" class="hover:text-[#a05d35]">About</a>
+        <a href="/blog" class="hover:text-[#a05d35]">Blog</a>
+        <a href="/shop" class="hover:text-[#a05d35]">Shop</a>
+        <a href="/portal" class="hover:text-[#a05d35]">Portal</a>
+        <a href="/onboard" class="hover:text-[#a05d35]">Onboard</a>
+      </nav>
+    </header>
 
     <main class="p-0">
       <slot />
     </main>
 
-    <footer class="relative z-50 bg-[#fff8ef] py-1 px-12 p-1000 mt-12 text-sm text-center text-gray-500">
+    <footer
+      class="relative z-50 bg-[#fff8ef] py-1 px-12 p-1000 mt-12 text-sm text-center text-gray-500"
+    >
       &copy; 2025 Roaming Bear Honey Co. All rights reserved.
     </footer>
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/687d7873416fc119149cbe1f/1j0l1t0ni';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
 
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+      var Tawk_API = Tawk_API || {},
+        Tawk_LoadStart = new Date();
+      (function () {
+        var s1 = document.createElement("script"),
+          s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = "https://embed.tawk.to/687d7873416fc119149cbe1f/1j0l1t0ni";
+        s1.charset = "UTF-8";
+        s1.setAttribute("crossorigin", "*");
+        s0.parentNode.insertBefore(s1, s0);
+      })();
+    </script>
+    <!--End of Tawk.to Script-->
+
+    <!-- Menu Toggle Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggleButton = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const line1 = document.getElementById('line1');
+        const line2 = document.getElementById('line2');
+        const line3 = document.getElementById('line3');
+
+        if (!toggleButton || !mobileMenu || !menuIcon || !line1 || !line2 || !line3) return;
+
+        let isOpen = false;
+
+        toggleButton.addEventListener('click', () => {
+          mobileMenu.classList.toggle('hidden');
+          mobileMenu.classList.toggle('scale-y-0');
+          isOpen = !isOpen;
+
+          if (isOpen) {
+            line1.setAttribute('d', 'M4 4L20 20');
+            line2.setAttribute('d', '');
+            line3.setAttribute('d', 'M20 4L4 20');
+          } else {
+            line1.setAttribute('d', 'M3 6h18');
+            line2.setAttribute('d', 'M3 12h18');
+            line3.setAttribute('d', 'M3 18h18');
+          }
+        });
+      });
+    </script>
   </body>
 </html>
