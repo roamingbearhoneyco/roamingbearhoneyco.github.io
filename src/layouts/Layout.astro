@@ -63,8 +63,13 @@ import '../styles/global.css';
 <footer
   class="relative z-50 bg-[#fff8ef] py-1 px-12 mt-12 text-sm text-center text-gray-500"
 >
-  &copy; 2025 Roaming Bear Honey Co. All rights reserved.
+  Copyright &copy; <span id="copyright" class="text-red-500"></span> Roaming Bear Honey Co. | All rights reserved
 </footer>
+
+<!-- Evergreen Copyright Year Script -->
+<script is:inline>
+  document.getElementById('copyright').textContent = new Date().getFullYear();
+</script>
 
 <!-- Tawk.to Chat Script -->
 <script type="text/javascript" is:inline>
