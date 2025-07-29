@@ -1,7 +1,7 @@
 ---
 
 title: A Post about Important Items Of Life
-date: 2022-11-20
+date: 2022-12-01
 author: Darnell McClure
 image: {
   src: "/images/post-1.jpg",

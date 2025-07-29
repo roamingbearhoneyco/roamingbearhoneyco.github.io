@@ -1,7 +1,7 @@
 ---
 
 title: Running out of sample post ideas
-date: 2022-11-25
+date: 2022-12-02
 author: Victoria Greenfelder
 image: {
   src: "/images/post-2.jpg",
