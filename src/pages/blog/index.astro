@@ -41,10 +41,11 @@ const posts: Post[] = Object.entries(modules)
   .filter((p) => !p.draft)
   .sort((a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf());
 ---
-<BlogLayout>
-  <div class="w-full text-center mb-10">
+<div class="w-full text-center mb-10">
   <h1 class="text-4xl font-bold">Our Journal</h1>
   </div>
+
+<BlogLayout>
 
   <ul
     role="list"
