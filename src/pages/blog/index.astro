@@ -41,32 +41,30 @@ const posts: Post[] = Object.entries(modules)
   .filter((p) => !p.draft)
   .sort((a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf());
 ---
-<div class="w-full text-center mb-10">
-  <h1 class="text-4xl font-bold">Our Journal</h1>
-  </div>
 
 <BlogLayout>
- {posts.map((post) => (
-      <li>
-        <a
-          href={`/blog/${post.slug}`}
-          class="block bg-white rounded-lg overflow-hidden shadow transition hover:shadow-lg"
-        >
-          {post.image && (
-            <img
-              src={post.image.src}
-              alt={post.image.alt}
-              class="w-full h-48 object-cover"
-            />
-          )}
-          <div class="p-4">
-            <h2 class="text-xl font-semibold mb-2">{post.title}</h2>
-            <!-- <p class="text-gray-600 mb-4">{post.description}</p>-->
-            <time class="text-sm text-gray-400">
-              {post.displayDate}
-            </time>
-          </div>
-        </a>
-      </li>
-    ))}
+  <div slot="heading" class="w-full text-center mb-10">
+    <h1 class="text-4xl font-bold">Our Journal</h1>
+  </div>
+
+  {posts.map((post) => (
+    <li>
+      <a
+        href={`/blog/${post.slug}`}
+        class="block bg-white rounded-lg overflow-hidden shadow transition hover:shadow-lg"
+      >
+        {post.image && (
+          <img
+            src={post.image.src}
+            alt={post.image.alt}
+            class="w-full h-48 object-cover"
+          />
+        )}
+        <div class="p-4">
+          <h2 class="text-xl font-semibold mb-2">{post.title}</h2>
+          <time class="text-sm text-gray-400">{post.displayDate}</time>
+        </div>
+      </a>
+    </li>
+  ))}
 </BlogLayout>
