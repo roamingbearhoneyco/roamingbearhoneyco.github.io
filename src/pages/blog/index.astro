@@ -46,9 +46,7 @@ const posts: Post[] = Object.entries(modules)
   </div>
 
 <BlogLayout>
-
-  <ul>
-    {posts.map((post) => (
+ {posts.map((post) => (
       <li>
         <a
           href={`/blog/${post.slug}`}
@@ -71,5 +69,4 @@ const posts: Post[] = Object.entries(modules)
         </a>
       </li>
     ))}
-  </ul>
 </BlogLayout>
