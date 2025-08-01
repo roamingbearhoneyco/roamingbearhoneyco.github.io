@@ -1,0 +1,51 @@
+---
+import Layout from './Layout.astro';
+const {
+  title,
+  date,
+  author,
+  category,
+  description,
+  image,
+} = Astro.props.frontmatter;
+
+const locale = 'en-US';
+const formatDate = (d: string) =>
+  new Date(d).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+const displayDate = formatDate(date);
+---
+
+<Layout>
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 text-[#292524] leading-relaxed">
+    <!-- Hero Image -->
+    {image?.src && (
+      <div class="mb-10">
+        <img
+          src={image.src}
+          alt={image.alt ?? ''}
+          class="w-full h-64 object-cover rounded-lg shadow-md"
+        />
+      </div>
+    )}
+
+    <!-- Metadata Block -->
+    <header class="mb-8 text-sm text-gray-500 space-y-1">
+      <div class="text-xs uppercase tracking-wide font-semibold text-[#a05d35]">{category}</div>
+      <h1 class="text-3xl font-bold text-[#1a1a1a]">{title}</h1>
+      <div>
+        <span>By {author}</span> &bull; <time>{displayDate}</time>
+      </div>
+      <p class="mt-2 text-gray-600 italic">{description}</p>
+    </header>
+
+    <!-- Markdown Content -->
+    <section class="prose prose-lg prose-h2:text-[#193a0d] prose-h3:text-[#a05d35] prose-p:text-[#292524] prose-li:marker:text-[#a05d35] prose-img:rounded-lg prose-img:shadow-md max-w-none">
+      <slot />
+    </section>
+  </article>
+</Layout>

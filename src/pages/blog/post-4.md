@@ -1,5 +1,5 @@
 ---
-
+layout: '../../layouts/PostLayout.astro'
 title: Why is this CSS so weird?
 date: 2022-12-04
 author: Anna Dixon

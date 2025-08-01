@@ -1,5 +1,5 @@
 ---
-
+layout: '../../layouts/PostLayout.astro'
 title: A Post about Important Items Of Life
 date: 2022-12-01
 author: Darnell McClure

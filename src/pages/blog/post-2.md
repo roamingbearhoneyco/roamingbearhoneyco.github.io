@@ -1,5 +1,5 @@
 ---
-
+layout: '../../layouts/PostLayout.astro'
 title: Running out of sample post ideas
 date: 2022-12-02
 author: Victoria Greenfelder
