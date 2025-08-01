@@ -1,0 +1,36 @@
+---
+interface PaginationProps {
+  url: {
+    current: string;
+    prev?: string;
+    next?: string;
+  };
+  currentPage: number;
+  lastPage: number;
+}
+
+const { url, currentPage, lastPage } = Astro.props;
+---
+<nav class="flex items-center justify-center gap-4 text-sm text-gray-700">
+  {url.prev && (
+    <a
+      href={url.prev}
+      class="px-4 py-2 border rounded hover:bg-gray-100 transition"
+    >
+      ← Previous
+    </a>
+  )}
+
+  <span class="px-4 py-2 border rounded text-gray-500">
+    Page {currentPage} of {lastPage}
+  </span>
+
+  {url.next && (
+    <a
+      href={url.next}
+      class="px-4 py-2 border rounded hover:bg-gray-100 transition"
+    >
+      Next →
+    </a>
+  )}
+</nav>

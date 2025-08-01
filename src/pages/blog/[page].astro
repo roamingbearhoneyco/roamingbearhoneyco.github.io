@@ -1,5 +1,7 @@
 ---
 import BlogLayout from '../../layouts/BlogLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import PaginationNav from '../../components/PaginationNav.astro';
 
 interface Frontmatter {
   title: string;
@@ -69,43 +71,15 @@ const page = Astro.props.page as {
   </div>
 
     {page.data.map((post) => (
-      <li>
-        <a
-          href={`/blog/${post.slug}`}
-          class="block bg-white rounded-lg overflow-hidden shadow transition hover:shadow-lg"
-        >
-          {post.image && (
-            <img
-              src={post.image.src}
-              alt={post.image.alt}
-              class="w-full h-48 object-cover"
-            />
-          )}
-          <div class="p-4">
-            <h2 class="text-xl font-semibold mb-2">{post.title}</h2>
-            <time class="text-sm text-gray-400">{post.displayDate}</time>
-            <p class="mt-2 text-gray-700">{post.description}</p>
-          </div>
-        </a>
-      </li>
-    ))}
+  <PostCard post={post} />
+))}
 
-  <Fragment slot="pagination">
-  <nav class="flex items-center gap-4">
-    {page.url.prev && (
-      <a href={page.url.prev} class="px-4 py-2 border rounded hover:bg-gray-100 transition">
-        ← Previous
-      </a>
-    )}
-    <span class="px-4 py-2 border rounded text-gray-500">
-      Page {page.currentPage} of {page.lastPage}
-    </span>
-    {page.url.next && (
-      <a href={page.url.next} class="px-4 py-2 border rounded hover:bg-gray-100 transition">
-        Next →
-      </a>
-    )}
-  </nav>
+ <Fragment slot="pagination">
+  <PaginationNav
+    url={page.url}
+    currentPage={page.currentPage}
+    lastPage={page.lastPage}
+  />
 </Fragment>
 
 </BlogLayout>
