@@ -1,0 +1,87 @@
+---
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { getCategories } from '../../../utils/getCategories';
+
+interface Frontmatter {
+  title: string;
+  date: string;
+  description: string;
+  image?: { src: string; alt: string };
+  category?: string;
+  draft?: boolean;
+}
+
+interface PostModule {
+  frontmatter: Frontmatter;
+}
+
+type Post = Frontmatter & {
+  slug: string;
+  displayDate: string;
+};
+
+export async function getStaticPaths() {
+  const categories = getCategories();
+
+  return categories.map((cat) => ({
+    params: { category: cat.toLowerCase() },
+  }));
+}
+
+const { category } = Astro.params;
+
+const locale = 'en-US';
+const formatDate = (d: string) =>
+  new Date(d).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+const modules = import.meta.glob<PostModule>('../*.md', { eager: true });
+
+const posts: Post[] = Object.entries(modules)
+  .map(([path, mod]) => {
+    const slug = path.match(/\.\/(.+)\.md$/)?.[1]!;
+    const {
+      title,
+      date,
+      description,
+      image,
+      category: cat,
+      draft,
+    } = mod.frontmatter;
+
+    return {
+      slug,
+      title,
+      date,
+      description,
+      image,
+      category: cat?.toLowerCase(), // ⬅ normalize here
+      draft,
+      displayDate: formatDate(date),
+    };
+  })
+  .filter((p) => !p.draft && p.category === category)
+  .sort((a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf());
+
+  console.log("Slug:", category);
+  console.log("Available posts:", posts.map(p => p.category));
+
+
+---
+
+<BlogLayout>
+  <div slot="heading" class="text-center mb-10">
+    <h1 class="text-4xl font-bold">Category: {category}</h1>
+    <p class="text-gray-600 mt-2">Showing posts tagged with "{category}"</p>
+  </div>
+
+  {posts.length > 0 ? (
+    posts.map((post) => <PostCard post={post} />)
+  ) : (
+    <p class="text-center text-gray-500">No posts found in this category.</p>
+  )}
+</BlogLayout>
