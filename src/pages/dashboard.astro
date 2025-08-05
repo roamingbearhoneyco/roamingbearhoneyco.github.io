@@ -1,0 +1,8 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DashboardClient from "../components/DashboardClient.tsx";
+---
+
+<Layout title="Dashboard">
+  <DashboardClient client:only="react" />
+</Layout>
