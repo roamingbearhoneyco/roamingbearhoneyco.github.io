@@ -1,7 +1,7 @@
 ---
 layout: '../../layouts/PostLayout.astro'
 title: Beginning with CSS
-date: 2022-12-03
+date: 11-15-2022
 author: Darnell McClure
 image: {
   src: "/images/post-3.jpg",

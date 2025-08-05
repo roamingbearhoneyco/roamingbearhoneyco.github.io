@@ -30,13 +30,18 @@ type Post = Frontmatter & {
 // ✅ Get posts inside getStaticPaths to avoid scoping errors
 export function getStaticPaths({ paginate }: { paginate: <T>(data: T[], opts: { pageSize: number }) => any[] }) {
   const locale = 'en-US';
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString(locale, {
+  const formatDate = (d: string) => {
+    const [month, day, year] = d.split('-').map(Number);
+    const parsedDate = new Date(year, month - 1, day);
+
+    return parsedDate.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'UTC', // Optional — forces consistent rendering at build time
     });
-
+  };
+  
   const modules = import.meta.glob<PostModule>('./*.md', { eager: true });
 
   const posts: Post[] = Object.entries(modules)
