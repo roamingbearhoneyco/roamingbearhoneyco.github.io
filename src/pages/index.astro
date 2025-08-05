@@ -9,8 +9,8 @@ import Layout from '../layouts/Layout.astro';
   <!-- Gradient Overlay Layer -->
   <div class="fixed inset-0 z-10 bg-gradient-to-b from-[#f5e7d0]/30 to-[#d7af79]/0"></div>
 
-  <!-- Hero Content (relative so it's scrollable) -->
-  <section class="relative z-20 h-[110vh] flex flex-col justify-center items-center text-center px-4 text-[#000000] animate-fade-in-up">
+  <!-- Hero Section -->
+  <section class="relative z-20 h-[80vh] flex flex-col justify-center items-center text-center px-4 text-[#000000] animate-fade-in-up">
     <h1 class="text-5xl sm:text-6xl font-extrabold drop-shadow-md mb-6 leading-tight">
       Welcome to Roaming Bear Honey Co.
     </h1>
@@ -25,49 +25,42 @@ import Layout from '../layouts/Layout.astro';
     </a>
   </section>
 
-  <!-- Scrollable Content That Covers the Hero -->
-  <section class="relative z-30 bg-[#fff8ef] py-20 px-4 text-[#1d1d1b]">
-    <div class="max-w-3xl mx-auto space-y-8">
-  <h2 class="text-4xl font-bold tracking-tight text-gray-900">Our Story</h2>
-  
-      <div class="space-y-4 text-lg text-gray-700">
-        <p>
-          Roaming Bear Honey Co. started with a simple truth: when you slow down enough to truly <em>listen</em> to the hum of a hive, something in you shifts.
-        </p>
-        
-        <p>
-          We believe great honey doesn’t begin in the jar—it begins in the soil, the weather, the temperament of a queen, and the patience of a keeper. We honor those things. We move at their pace. And in doing so, we craft honey that carries the weight of place.
-        </p>
-        
-        <p>
-          Every jar we offer reflects what we’ve observed, tended, and protected. This isn’t a race to scale—it’s a commitment to resilience, transparency, and emotional resonance. From the foothills of Virginia to a porch in Montana, Roaming Bear is grounded in care.
-        </p>
-        
-        <p>
-          But we’re not doing this alone.
-        </p>
-        
-        <p>
-          Through our <strong>Friends of the Bear</strong> initiative, we’re inviting others into the story. Whether through hive adoption, collaborative publishing, or offering small-batch harvests from their own apiaries, we’re building a platform that amplifies the voices of beekeepers across the country. We showcase their honey. Their practices. Their stories.
-        </p>
-        
-        <p>
-          Roaming Bear isn’t just about honey. It’s about protecting the dignity of small-scale care. About giving keepers a space to be heard and a way to thrive. We’re building tools that empower others while keeping brand soul in the founder’s hands—systems that scale with intention and stories that stick.
-        </p>
-        
-        <p>
-          If you’re here, you’re already part of that movement.
-          <br>
-          <strong>Welcome to Roaming Bear.</strong>
-        </p>
-        
-        <p class="pt-2 text-base text-gray-600 italic">
-          Every jar supports sustainable beekeeping and promotes biodiversity in our ecosystems. Taste the difference in every drop.
-        </p>
+  <!-- Story Content Section -->
+  <section class="relative z-30 py-20 px-4 sm:px-6">
+  <div class="max-w-7xl mx-auto">
+    
+    <div class="rounded-2xl bg-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] px-6 py-10 sm:px-10 sm:py-16">
+      
+      <div class="relative border-l-4 border-[#a05d35] pl-4 sm:pl-6 mb-10">
+        <h2 class="text-4xl font-bold tracking-tight text-gray-900">
+          Our Story
+        </h2>
       </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8 text-lg text-gray-700">
+        <div class="space-y-6">
+          <p>Roaming Bear Honey Co. started with a simple truth: when you slow down enough to truly <em>listen</em> to the hum of a hive, something in you shifts.</p>
+          <p>We believe great honey doesn’t begin in the jar—it begins in the soil, the weather, the temperament of a queen, and the patience of a keeper.</p>
+          <p>Every jar we offer reflects what we’ve observed, tended, and protected. This isn’t a race to scale—it’s a commitment to resilience, transparency, and emotional resonance.</p>
+          <p>But we’re not doing this alone.</p>
+        </div>
+
+        <div class="space-y-6">
+          <p>Through our <strong>Friends of the Bear</strong> initiative, we invite others into the story—via hive adoption, collaborative publishing, and sharing small-batch harvests.</p>
+          <p>We showcase their honey. Their practices. Their stories.</p>
+          <p>Roaming Bear isn’t just about honey. It’s about protecting the dignity of small-scale care and giving keepers space to be heard.</p>
+          <p>Welcome to Roaming Bear.</p>
+          <p class="text-base text-gray-600 italic pt-2">
+            Every jar supports sustainable beekeeping and promotes biodiversity in our ecosystems. Taste the difference in every drop.
+          </p>
+        </div>
+      </div>
+      
     </div>
-    </div>
-  </section>
+    
+  </div>
+</section>
+
 </Layout>
 
 <style>
