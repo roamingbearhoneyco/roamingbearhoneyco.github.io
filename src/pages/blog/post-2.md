@@ -8,7 +8,7 @@ image: {
   alt: "A picture of a coder",
 }
 description: Sometimes you just run out of ideas for sample blog posts. It’s no one’s fault, it’s just the way it is.
-draft: false
+draft: true
 category: Balled Up Bees
 ---
 

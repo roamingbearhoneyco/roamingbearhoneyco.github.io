@@ -1,25 +1,79 @@
 ---
 layout: '../../layouts/PostLayout.astro'
-title: Building an Astro Post Tag Component
-date: 12-01-2022
-author: Anna Dixon
+title: Oh The Lessons We Learn...
+date: 08-05-2025
+author: Justin McIntyre
 image: {
   src: "/images/post-6.jpg",
   alt: "A picture of a coder",
 }
-description: In this project, we’ll build out a custom Astro component for post tags.
+description: Too much of a good thing is still, too much.
 draft: false
-category: CSS
+category: Balled Up Bees
 ---
 
-#Building the Best Blog
+### As Pretty as this image is
 
-Nisi duis ex aliqua eu officia eiusmod duis magna pariatur. Irure laborum qui aliqua nulla esse cillum laborum aliquip nulla elit. Id id Lorem duis irure cillum culpa. Nulla sint et aliqua velit do. Nulla sit sit proident consectetur enim ullamco aliqua in reprehenderit ullamco officia.
+I don't think it's what I had in mind for the end of my hive inspection.
 
-Ad ipsum velit sint enim exercitation mollit consequat elit mollit qui commodo aute. Laboris culpa voluptate aliquip incididunt duis. Cupidatat aliquip et sunt aute fugiat cupidatat irure voluptate. Occaecat officia et sunt.
+It started like a dream.
 
-Officia tempor voluptate enim consequat cillum aute fugiat cupidatat incididunt magna labore in commodo. Eiusmod nostrud non deserunt. Incididunt excepteur pariatur magna. Proident aute ad in velit labore enim sit cillum ad mollit proident et qui. Esse sunt ullamco ullamco ipsum enim eu esse id eu exercitation laboris magna Lorem. Anim nostrud officia anim velit do exercitation labore mollit excepteur excepteur ex.
+A textbook inspection of my new colony—the one from the swarm trap I’d set weeks ago. Foundation drawn clean. Bees working the frames like they’d been trained by a textbook editor. Eggs, larvae, capped brood—all in perfect harmony. You could trace the developmental stages like a painter stepping back from a canvas. It wasn’t just good—it felt *correct*. As if nature had glanced over my setup and given a quiet nod of approval.
 
-Ipsum adipisicing exercitation dolor pariatur labore qui. Culpa cupidatat ea elit eiusmod tempor ea qui dolor Lorem laborum adipisicing. Ad ea laboris qui cupidatat deserunt culpa. Nulla ex velit adipisicing proident fugiat deserunt sunt eu adipisicing sint incididunt quis qui. Nulla fugiat labore duis ullamco reprehenderit excepteur laboris tempor ullamco aliquip laborum aliqua. Est tempor nisi magna ut elit pariatur commodo.
+There are days as a first-year beekeeper when everything feels like guesswork. This wasn’t one of them.
 
-Labore commodo do incididunt amet ad et exercitation magna veniam veniam aute laboris excepteur occaecat Lorem. Fugiat in magna commodo magna nulla eu. Fugiat nulla aliqua sunt duis enim irure aliquip fugiat aliqua Lorem ad tempor incididunt proident incididunt. Labore fugiat tempor esse cillum voluptate culpa anim sunt consequat. Ipsum minim nostrud laborum sit aliquip duis officia consequat est. Fugiat mollit elit nulla. Sit minim est elit labore. Sunt eu pariatur pariatur ut deserunt nulla labore in non sit tempor voluptate ex.
+The colony was vibrant, engaged. They were drawing comb on the foundation I’d given them, placing nectar in fresh cells, and tending brood across multiple stages. It was a full biological spectrum on display, quiet and industrious. These were bees that had found their rhythm. And for a few moments, I got to bask in it.
+
+But the inspection didn’t end there. I had another hive to visit—the older one. The more… *temperamental* one.
+
+This colony had always been a bit spicy with me. Not unmanageable, but they didn’t suffer fools—or slow-moving humans. Just a couple weeks back, they’d gifted me about five gallons of honey. They were still working hard, too. I’d placed a single super back on top and they’d promptly repaired and cleaned the comb. These bees weren’t sluggish. They weren’t passive. They were *doing the work*.
+
+So I approached them differently.
+
+This time, I decided to use smoke.
+
+I hadn’t leaned on it much before—maybe a puff or two here and there—but something about the day made me reach for it. It was like my subconscious whispered, *don’t go in bare-handed this time.* And maybe it was right. But maybe it wasn’t.
+
+With a few puffs of smoke, I began the inspection. Super first: nectar going back in, not dripping but meaningful. The resource flow was active. Down in the top brood box, things looked strong. Eggs. Larvae. Even patterns of capped brood that were so neat, I found myself narrating a mental timeline.
+
+One frame had clearly been cleaned post-emergence, ready for the queen’s return. Another held capped brood that had to be around twenty days old. Then a frame with eggs, larvae, and developing brood all at once. It was like reading her diary in wax.
+
+Still, no queen.
+
+I’ve never seen her in this hive—not once since I got it. Always inferred, never observed. But I saw her work. And I’ve always felt that seeing her trail was enough.
+
+Still, it would’ve been nice to see her. Just once.
+
+I moved the last box aside, did a final check, and prepared to close up. My last step was to reduce the entrance. With honey flow picking up and a second hive added to the apiary, I wanted to make sure everyone could defend what’s theirs. Especially with this more assertive colony.
+
+So I puffed a bit of smoke toward the entrance—and that’s when I saw it.
+
+A tight ball of bees.
+
+My first thought? Maybe a wasp snuck in. Or maybe they were pushing out a drone. It looked foreign. Off. I gave another light puff and watched them scatter. Then I realized...
+
+They weren’t surrounding an intruder.
+
+They were surrounding *her*.
+
+My queen.
+
+Wrapped in workers, partly obscured, and only revealed after the smoke drifted. She took careful, slow steps back toward the entrance. But in those final moments, I saw something I can’t quite shake:
+
+Her back leg.
+
+It might’ve been dragging.
+
+Was it injury? Confusion from the smoke? A failed attempt to abscond? A protective circle? I don’t know. But I do know that my moment of awe—seeing her for the first time—was immediately colored by fear.
+
+Had I caused this?
+
+Did the smoke disrupt her pheromones, make the hive mistake her for something else? Did they ball her out of instinct or warning? Or was she on her way out, only to be pulled back in?
+
+I saw eggs. Resources. Everything looked normal. But now I’ll wait. Three to five days, and I’ll inspect again. If the colony’s chosen a different path—queen cells, emergency signs, or worse—I’ll find out soon.
+
+But until then, I’m letting silence do the talking.
+
+*Too much of a good thing* really might be too much.
+
+And the hive never forgets.

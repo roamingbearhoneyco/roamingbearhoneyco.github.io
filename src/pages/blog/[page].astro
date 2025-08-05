@@ -7,8 +7,6 @@ import CategoryCard from '../../components/CategoryCard.astro';
 
 const categoryList = getCategories();
 
-
-
 interface Frontmatter {
   title: string;
   date: string;
@@ -41,7 +39,7 @@ export function getStaticPaths({ paginate }: { paginate: <T>(data: T[], opts: { 
       timeZone: 'UTC', // Optional — forces consistent rendering at build time
     });
   };
-  
+
   const modules = import.meta.glob<PostModule>('./*.md', { eager: true });
 
   const posts: Post[] = Object.entries(modules)

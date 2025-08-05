@@ -3,6 +3,8 @@ import BlogLayout from '../../../layouts/BlogLayout.astro';
 import PostCard from '../../../components/PostCard.astro';
 import { getCategories } from '../../../utils/getCategories';
 
+
+
 interface Frontmatter {
   title: string;
   date: string;
@@ -52,6 +54,7 @@ const posts: Post[] = Object.entries(modules)
       image,
       category: cat,
       draft,
+      author
     } = mod.frontmatter;
 
     return {
@@ -60,9 +63,10 @@ const posts: Post[] = Object.entries(modules)
       date,
       description,
       image,
-      category: cat?.toLowerCase(), // ⬅ normalize here
+      category: cat?.toLowerCase(),
       draft,
       displayDate: formatDate(date),
+      author,
     };
   })
   .filter((p) => !p.draft && p.category === category)
@@ -77,7 +81,7 @@ const posts: Post[] = Object.entries(modules)
 <BlogLayout>
   <div slot="heading" class="text-center mb-10">
     <h1 class="text-4xl font-bold">Category: {category}</h1>
-    <p class="text-gray-600 mt-2">Showing posts tagged with "{category}"</p>
+    <p class="text-gray-600 mt-2">Showing posts tagged with: "{category}"</p>
   </div>
 
   {posts.length > 0 ? (
