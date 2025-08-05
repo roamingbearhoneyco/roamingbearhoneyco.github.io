@@ -9,7 +9,7 @@ image: {
 }
 description: In this project, we’ll build out a custom Astro component for post tags.
 draft: false
-category: Astro
+category: CSS
 ---
 
 #Building the Best Blog

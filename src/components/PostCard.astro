@@ -5,6 +5,7 @@ interface Post {
   description: string;
   image?: { src: string; alt: string };
   displayDate: string;
+  author: string;
 }
 
 const { post } = Astro.props;
@@ -23,7 +24,7 @@ const { post } = Astro.props;
     )}
     <div class="p-4">
       <h2 class="text-xl font-semibold mb-2">{post.title}</h2>
-      <time class="text-sm text-gray-400">{post.displayDate}</time>
+      <time class="text-sm text-gray-400">{post.displayDate}</time> &bull; <span>By {post.author}</span> 
       <p class="mt-2 text-gray-700">{post.description}</p>
     </div>
   </a>
