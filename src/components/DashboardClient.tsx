@@ -59,7 +59,7 @@ export default function DashboardClient() {
           </div>
           <div>
             <span className="font-medium text-gray-700">Subscription Tier:</span>{' '}
-            <span>{tier ?? 'Free'}</span>
+            <span>{tier ?? 'N/A'}</span>
           </div>
           <div>
             <span className="font-medium text-gray-700">Account Created:</span>{' '}
