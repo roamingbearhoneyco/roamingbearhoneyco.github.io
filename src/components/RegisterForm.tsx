@@ -69,7 +69,7 @@ export default function RegisterForm() {
         .from('rbhc-table-profiles')
         .insert([
           {
-            id: userId, // or 'user_id' depending on your schema
+            user_id: userId, 
             subscription_tier: 'queen',
             created_at: new Date().toISOString(),
           },
