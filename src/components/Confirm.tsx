@@ -4,11 +4,11 @@ import { supabase } from '../lib/supabase';
 
 export default function Confirm() {
   useEffect(() => {
-    // Parse the URL hash params
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const access_token = params.get('access_token');
     const refresh_token = params.get('refresh_token');
+    const type = params.get('type'); // 👈 NEW: get the type param
 
     if (access_token && refresh_token) {
       supabase.auth
@@ -18,7 +18,12 @@ export default function Confirm() {
             alert('Failed to confirm session: ' + error.message);
             window.location.href = '/signin';
           } else {
-            window.location.href = '/dashboard';
+            // ✅ Branch based on type: `recovery` = password reset
+            if (type === 'recovery') {
+              window.location.href = '/reset';
+            } else {
+              window.location.href = '/dashboard';
+            }
           }
         });
     } else {
