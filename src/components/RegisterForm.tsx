@@ -29,10 +29,8 @@ export default function RegisterForm() {
       return;
     }
 
-    const redirectUrl =
-      import.meta.env.MODE === 'development'
-        ? 'http://localhost:4321/confirm'
-        : 'https://testsite.roamingbearhoneyco.com/confirm';
+    const redirectUrl = 'https://testsite.roamingbearhoneyco.com/confirm';
+
 
     console.log('📤 Attempting to sign up with:', { email, redirectUrl });
 
@@ -58,7 +56,6 @@ export default function RegisterForm() {
       },
     });
 
-    console.log('📥 Supabase response:', { data, error });
 
     // Extra check for already confirmed users based on identities length
     if (data?.user && (data.user.identities?.length ?? 0) === 0) {
