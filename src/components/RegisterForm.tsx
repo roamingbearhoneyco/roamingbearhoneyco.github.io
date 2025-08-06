@@ -31,22 +31,7 @@ export default function RegisterForm() {
 
     const redirectUrl = 'https://testsite.roamingbearhoneyco.com/confirm';
 
-
     console.log('📤 Attempting to sign up with:', { email, redirectUrl });
-
-    // Check if user already exists by fetching user metadata before signing up
-    const { data: existingUser, error: fetchError } = await supabase
-      .from('users') // or 'auth.users' if you have access to auth users table
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (!fetchError && existingUser) {
-      // Redirect to signin page with message query param
-      const signinUrl = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
-      window.location.href = signinUrl;
-      return;
-    }
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -56,26 +41,48 @@ export default function RegisterForm() {
       },
     });
 
-     // Extra check for already confirmed users based on identities length
-    if (data?.user && (data.user.identities?.length ?? 0) === 0) {
-      // Redirect instead of showing inline error
-      const signinUrl = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
-      window.location.href = signinUrl;
-      return;
-    }
-
     if (error) {
       if (error.message.toLowerCase().includes('user already registered')) {
-        // Fallback redirect for existing user edge case
         const signinUrl = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
         window.location.href = signinUrl;
       } else {
         setErrorMessage(error.message);
         setStatus('error');
       }
-    } else {
+      return;
+    }
+
+    const user = data?.user;
+
+    if (user) {
+      const { id: userId, identities } = user;
+
+      if ((identities?.length ?? 0) === 0) {
+        // User already exists — redirect to signin
+        const signinUrl = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
+        window.location.href = signinUrl;
+        return;
+      }
+
+      // ✅ New user — create profile
+      const { error: profileError } = await supabase
+        .from('rbhc-table-profiles')
+        .insert([
+          {
+            user_id: userId, 
+            subscription_tier: 'queen',
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (profileError) {
+        console.error('❌ Error creating profile:', profileError.message);
+        setErrorMessage('Account created, but profile setup failed.');
+        setStatus('error');
+        return;
+      }
+
       setStatus('success');
-      // Clear passwords after success
       setPassword('');
       setConfirmPassword('');
     }
