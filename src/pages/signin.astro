@@ -4,7 +4,15 @@ import SignInForm from "../components/SignInForm.tsx";
 ---
 
 <Layout title="Sign in">
-  <h1>Sign in</h1>
-  <p>New here? <a href="/register">Create an account</a></p>
-  <SignInForm client:only="react" />
+  <section class="max-w-md mx-auto space-y-6">
+    <h1 class="text-3xl font-bold text-[#19360e]">Welcome Back</h1>
+    <p class="text-sm text-gray-700">
+      New here? 
+      <a href="/register" class="text-[#a05d35] hover:underline font-medium">
+        Create an account
+      </a>
+    </p>
+
+    <SignInForm client:only="react" />
+  </section>
 </Layout>
