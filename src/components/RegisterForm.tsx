@@ -56,6 +56,27 @@ export default function RegisterForm() {
       },
     });
 
+    if (data?.user) {
+    const { id: userId } = data.user;
+
+    const { error: profileError } = await supabase
+      .from('rbhc-table-profiles')
+      .insert([
+        {
+          user_id: userId, // assuming your profiles table uses 'user_id' as FK
+          subscription_tier: 'queen', // default value
+          created_at: new Date().toISOString(), // optional, if you have a created_at field
+        },
+      ]);
+
+    if (profileError) {
+      console.error('❌ Error creating profile:', profileError.message);
+      setErrorMessage('Account created, but profile setup failed.');
+      setStatus('error');
+      return;
+    }
+  }
+
 
     // Extra check for already confirmed users based on identities length
     if (data?.user && (data.user.identities?.length ?? 0) === 0) {
