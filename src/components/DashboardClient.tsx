@@ -63,7 +63,7 @@ export default function DashboardClient() {
           </div>
           <div>
             <span className="font-medium text-gray-700">Account Created:</span>{' '}
-            <span>{createdAt ? new Date(createdAt).toLocaleString() : 'N/A'}</span>
+            <span>{createdAt ? new Date(createdAt + 'Z').toLocaleString() : 'N/A'}</span>
           </div>
         </div>
       )}
