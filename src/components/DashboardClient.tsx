@@ -72,7 +72,7 @@ export default function DashboardClient() {
         </div>
       )}
 
-      <p className="text-sm text-gray-600 text-center">
+      <p className="text-shadow-sm text-gray-600 text-center">
         Thanks for supporting Roaming Bear Honey Co 🍯
       </p>
 
