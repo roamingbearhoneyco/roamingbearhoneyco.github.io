@@ -25,7 +25,7 @@ export default function SignInForm() {
     // Check if user session exists and redirect if so
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        window.location.href = '/dashboard'
+        window.location.href = '/portal'
       }
     })
   }, [])
@@ -40,7 +40,7 @@ export default function SignInForm() {
     if (error) {
       alert(error.message)
     } else {
-      window.location.href = '/dashboard'
+      window.location.href = '/portal'
     }
   }
 

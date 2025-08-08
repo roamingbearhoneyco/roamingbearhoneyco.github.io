@@ -1,12 +1,30 @@
 
 ---
 import Layout from '../layouts/Layout.astro';
+import DashboardClient from '../components/DashboardClient.tsx';
 ---
 
 <Layout>
-  <div class="gridder">
-    <div class="h-16 rounded-full bg-blue-500"></div>
-    <div class="h-16 rounded-full bg-orange-500"></div>
-    <div class="h-16 rounded-full bg-green-500"></div>
-  </div>
+  <!-- Fixed Background Image Layer -->
+  <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/vintage-honeycomb-bg.jpg');"></div>
+
+  <!-- Gradient Overlay Layer -->
+  <div class="fixed inset-0 z-10 bg-gradient-to-b from-[var(--color-soft-amber)]/60 to-[var(--color-golden-honey)]/20"></div>
+
+  <!-- Hero Section -->
+  <section class="hero fade-in-up">
+    <h1 class="hero-title text-gradient">
+      Member Portal
+    </h1>
+    <p class="hero-subtitle">
+      Welcome to your Roaming Bear Honey Co. dashboard
+    </p>
+  </section>
+
+  <!-- Dashboard Content Section -->
+  <section class="relative z-30 py-20 px-4 sm:px-6">
+    <div class="container-responsive">
+      <DashboardClient client:only="react" />
+    </div>
+  </section>
 </Layout>

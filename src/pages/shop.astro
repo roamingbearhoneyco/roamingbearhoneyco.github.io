@@ -7,14 +7,14 @@ import Layout from '../layouts/Layout.astro';
   <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/rbhc-honey.png');"></div>
 
   <!-- Gradient Overlay Layer -->
-  <div class="fixed inset-0 z-10 bg-gradient-to-b from-[#f5e7d0]/60 to-[#d7af79]/0"></div>
+  <div class="fixed inset-0 z-10 bg-gradient-to-b from-[var(--color-soft-amber)]/60 to-[var(--color-golden-honey)]/0"></div>
 
   <!-- Hero Section -->
-  <section class="relative z-20 h-[90vh] flex flex-col justify-center items-center text-center px-4 text-[#1d1d1b] animate-fade-in-up">
-    <h1 class="text-5xl sm:text-6xl font-extrabold mb-4 leading-tight drop-shadow-md">
+  <section class="hero fade-in-up">
+    <h1 class="hero-title text-gradient">
       Honey'ville U.S.A.
     </h1>
-    <p class="max-w-2xl text-xl sm:text-2xl font-medium text-[#3e2e1d]">
+    <p class="hero-subtitle">
       Where wild honey meets community, conservation, and story.
     </p>
   </section>

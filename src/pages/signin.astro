@@ -3,16 +3,29 @@ import Layout from "../layouts/Layout.astro";
 import SignInForm from "../components/SignInForm.tsx";
 ---
 
-<Layout title="Sign in">
-  <section class="max-w-md mx-auto space-y-6">
-    <h1 class="text-3xl font-bold text-[#19360e]">Welcome Back</h1>
-    <p class="text-sm text-gray-700">
-      New here? 
-      <a href="/register" class="text-[#a05d35] hover:underline font-medium">
-        Create an account
-      </a>
-    </p>
+<Layout>
+  <!-- Fixed Background Image Layer -->
+  <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/vintage-honeycomb-bg.jpg');"></div>
 
-    <SignInForm client:only="react" />
+  <!-- Gradient Overlay Layer -->
+  <div class="fixed inset-0 z-10 bg-gradient-to-b from-[var(--color-soft-amber)]/70 to-[var(--color-golden-honey)]/30"></div>
+
+  <!-- Content Section -->
+  <section class="relative z-20 py-20 px-4 sm:px-6">
+    <div class="container-responsive">
+      <div class="max-w-md mx-auto">
+        <div class="card text-center mb-8">
+          <h1 class="text-3xl font-bold text-[var(--color-text-primary)] mb-2">Welcome Back</h1>
+          <p class="text-[var(--color-text-secondary)]">
+            New here? 
+            <a href="/register" class="text-[var(--color-secondary)] hover:text-[var(--color-accent)] font-medium transition-colors duration-300">
+              Create an account
+            </a>
+          </p>
+        </div>
+
+        <SignInForm client:only="react" />
+      </div>
+    </div>
   </section>
 </Layout>

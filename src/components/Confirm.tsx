@@ -25,7 +25,7 @@ export default function Confirm() {
             setStatus('success');
             setMessage(type === 'recovery' ? 'Password reset confirmed. Redirecting...' : 'Account confirmed! Redirecting...');
             setTimeout(() => {
-              window.location.href = type === 'recovery' ? '/reset' : '/dashboard';
+              window.location.href = type === 'recovery' ? '/reset' : '/portal';
             }, 1500);
           }
         });
@@ -37,9 +37,9 @@ export default function Confirm() {
   }, []);
 
   return (
-    <div className="max-w-md mx-auto bg-white border border-gray-200 shadow-md rounded p-6 text-center space-y-4">
-      <h1 className="text-xl font-bold text-[#19360e]">Hold tight!</h1>
-      <p className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-gray-700'}`}>
+    <div className="card max-w-md mx-auto text-center space-y-4">
+      <h1 className="text-xl font-bold text-[var(--color-primary)]">Hold tight!</h1>
+      <p className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-[var(--color-text-secondary)]'}`}>
         {message}
       </p>
     </div>

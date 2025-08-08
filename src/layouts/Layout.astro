@@ -3,20 +3,23 @@ import '../styles/global.css';
 ---
 <head>
   <meta charset="UTF-8" />
-      <!-- THIS is what you need to add: -->
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>Roaming Bear Honey Co.</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roaming Bear Honey Co.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<header class="sticky top-0 bg-[#19360e] shadow-md z-50">
-  <div class="py-3 px-4 sm:px-8 flex justify-between items-center">
-    <a href="/" class="flex items-center space-x-3">
-      <span class="text-2xl font-bold text-[#ffffff]">
+
+<header class="sticky top-0 bg-[var(--color-primary)] shadow-lg z-[var(--z-sticky)]">
+  <div class="container-responsive py-3 flex justify-between items-center">
+    <a href="/" class="flex items-center space-x-3 group">
+      <span class="text-2xl font-bold text-[var(--color-text-light)] group-hover:text-[var(--color-accent)] transition-colors duration-300">
         Roaming Bear Honey Co.
       </span>
     </a>
 
     <!-- Hamburger Toggle -->
-    <button id="menu-toggle" class="sm:hidden focus:outline-none text-white">
+    <button id="menu-toggle" class="sm:hidden focus:outline-none text-[var(--color-text-light)] hover:text-[var(--color-accent)] transition-colors duration-300">
       <svg
         id="menu-icon"
         class="w-6 h-6 transition-all duration-300 ease-in-out"
@@ -34,27 +37,27 @@ import '../styles/global.css';
     </button>
 
     <!-- Desktop Nav -->
-    <nav class="hidden sm:flex space-x-3 sm:space-x-6 text-[#ffffff] font-medium">
-      <a href="/" class="hover:text-[#a05d35]">Home</a>
-      <a href="/about" class="hover:text-[#a05d35]">About</a>
-      <a href="/blog/1" class="hover:text-[#a05d35]">Blog</a>
-      <a href="/shop" class="hover:text-[#a05d35]">Shop</a>
-      <a href="/portal" class="hover:text-[#a05d35]">Portal</a>
-      <a href="/onboard" class="hover:text-[#a05d35]">Onboard</a>
+    <nav class="hidden sm:flex space-x-3 sm:space-x-6 text-[var(--color-text-light)] font-medium">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/about" class="nav-link">About</a>
+      <a href="/blog/1" class="nav-link">Blog</a>
+      <a href="/shop" class="nav-link">Shop</a>
+      <a href="/portal" class="nav-link">Portal</a>
+      <a href="/onboard" class="nav-link">Onboard</a>
     </nav>
   </div>
 
-  <!-- Mobile Nav (Honeycomb Reveal) -->
+  <!-- Mobile Nav -->
   <nav
     id="mobile-menu"
-    class="sm:hidden hidden flex-col space-y-2 px-4 pb-4 text-[#ffffff] font-medium bg-[#19360e] shadow-md transition-all duration-300 ease-in-out transform scale-y-0 origin-top"
+    class="sm:hidden hidden flex-col space-y-2 px-4 pb-4 text-[var(--color-text-light)] font-medium bg-[var(--color-primary)] shadow-lg transition-all duration-300 ease-in-out transform scale-y-0 origin-top"
   >
-    <a href="/" class="hover:text-[#a05d35]">Home</a>
-    <a href="/about" class="hover:text-[#a05d35]">About</a>
-    <a href="/blog/1" class="hover:text-[#a05d35]">Blog</a>
-    <a href="/shop" class="hover:text-[#a05d35]">Shop</a>
-    <a href="/portal" class="hover:text-[#a05d35]">Portal</a>
-    <a href="/onboard" class="hover:text-[#a05d35]">Onboard</a>
+    <a href="/" class="nav-link py-2">Home</a>
+    <a href="/about" class="nav-link py-2">About</a>
+    <a href="/blog/1" class="nav-link py-2">Blog</a>
+    <a href="/shop" class="nav-link py-2">Shop</a>
+    <a href="/portal" class="nav-link py-2">Portal</a>
+    <a href="/onboard" class="nav-link py-2">Onboard</a>
   </nav>
 </header>
 
@@ -62,10 +65,15 @@ import '../styles/global.css';
   <slot />
 </main>
 
-<footer
-  class="relative z-50 bg-[#fff8ef] py-1 px-12 mt-12 text-sm text-center text-gray-500"
->
-  Copyright &copy; <span id="copyright" class="text-red-500"></span> Roaming Bear Honey Co. | All rights reserved
+<footer class="relative z-[var(--z-sticky)] bg-[var(--color-background)] py-6 px-4 mt-12 border-t border-[var(--color-accent)]/20">
+  <div class="container-responsive text-center">
+    <p class="text-sm text-[var(--color-text-secondary)]">
+      Copyright &copy; <span id="copyright" class="text-[var(--color-secondary)]"></span> Roaming Bear Honey Co. | All rights reserved
+    </p>
+    <p class="text-xs text-[var(--color-text-secondary)]/70 mt-2">
+      Local. Sustainable. Wild-crafted honey from the forest to your table.
+    </p>
+  </div>
 </footer>
 
 <!-- Evergreen Copyright Year Script -->

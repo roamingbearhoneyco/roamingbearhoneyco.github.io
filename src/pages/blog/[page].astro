@@ -77,24 +77,23 @@ const page = Astro.props.page as {
 ---
 
 <BlogLayout>
-  <div slot="heading" class=" bg-white/80 backdrop-blur-md w-full rounded-2xl shadow-2xl md:p-4 text-center p-2 mb-10 border border-[#f5e7d0]">
-    <h1 class="text-4xl font-bold">Whispers From the Hive</h1>
+  <div slot="heading" class="card text-center mb-10">
+    <h1 class="text-4xl font-bold text-[var(--color-text-primary)]">Whispers From the Hive</h1>
   </div>
 
-    {page.data.map((post) => (
-  <PostCard post={post} />
-))}
+  {page.data.map((post) => (
+    <PostCard post={post} />
+  ))}
 
-<Fragment slot="sidebar">
-  <CategoryCard categoryList={categoryList} />
-</Fragment>
+  <Fragment slot="sidebar">
+    <CategoryCard categoryList={categoryList} />
+  </Fragment>
 
- <Fragment slot="pagination">
-  <PaginationNav
-    url={page.url}
-    currentPage={page.currentPage}
-    lastPage={page.lastPage}
-  />
-</Fragment>
-
+  <Fragment slot="pagination">
+    <PaginationNav
+      url={page.url}
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+    />
+  </Fragment>
 </BlogLayout>

@@ -48,7 +48,7 @@ export default function ResetPassword() {
     } else {
       setStatus('success')
       setTimeout(() => {
-        window.location.href = '/dashboard'
+        window.location.href = '/portal'
       }, 2000)
     }
   }

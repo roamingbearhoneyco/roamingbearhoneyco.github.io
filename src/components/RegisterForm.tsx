@@ -13,7 +13,7 @@ export default function RegisterForm() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        window.location.href = '/dashboard';
+        window.location.href = '/portal';
       }
     });
   }, []);
