@@ -6,26 +6,34 @@ export default function DashboardClient() {
   const [uuid, setUuid] = useState<string | null>(null);
   const [tier, setTier] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setEmail(user.email);
-        setUuid(user.id);
-        
-        // Fetch user profile data
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('tier, created_at')
-          .eq('id', user.id)
-          .single();
-        
-        if (profile) {
-          setTier(profile.tier);
-          setCreatedAt(profile.created_at);
-        }
+      
+      if (!user) {
+        // Redirect to signin if not authenticated
+        window.location.href = '/signin';
+        return;
       }
+
+      setEmail(user.email ?? null);
+      setUuid(user.id);
+      
+      // Fetch user profile data
+      const { data: profile } = await supabase
+        .from('rbhc-table-profiles')
+        .select('subscription_tier, created_at')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (profile) {
+        setTier(profile.subscription_tier ?? null);
+        setCreatedAt(profile.created_at ?? null);
+      }
+      
+      setLoading(false);
     };
 
     getUser();
@@ -35,6 +43,14 @@ export default function DashboardClient() {
     await supabase.auth.signOut();
     window.location.href = '/';
   };
+
+  if (loading) {
+    return (
+      <div className="card max-w-xl mx-auto mt-10 text-center">
+        <p className="text-[var(--color-text-secondary)]">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="card max-w-xl mx-auto mt-10 space-y-6">
