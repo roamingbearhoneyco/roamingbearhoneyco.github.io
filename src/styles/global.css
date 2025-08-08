@@ -337,7 +337,8 @@
     font-weight: 500;
     max-width: 600px;
     margin-bottom: var(--space-2xl);
-    color: var(--color-text-secondary);
+    color: var(--color-text-light);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
   }
   
   /* Background Overlays */

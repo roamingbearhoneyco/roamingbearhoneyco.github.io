@@ -46,14 +46,14 @@ export default function DashboardClient() {
 
   if (loading) {
     return (
-      <div className="card max-w-xl mx-auto mt-10 text-center">
+      <div className="card max-w-xl mx-auto text-center">
         <p className="text-[var(--color-text-secondary)]">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="card max-w-xl mx-auto mt-10 space-y-6">
+    <div className="card max-w-xl mx-auto space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-[var(--color-primary)]">
           {email ? 'Welcome back!' : 'Loading...'}
