@@ -23,6 +23,7 @@ export default function RegisterForm() {
     setErrorMessage('');
     setStatus('idle');
 
+    // ✅ Check password match
     if (password !== confirmPassword) {
       setErrorMessage("Passwords don't match.");
       setStatus('error');
@@ -41,10 +42,10 @@ export default function RegisterForm() {
       },
     });
 
+    // ❌ Handle signup errors
     if (error) {
       if (error.message.toLowerCase().includes('user already registered')) {
-        const signinUrl = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
-        window.location.href = signinUrl;
+        window.location.href = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
       } else {
         setErrorMessage(error.message);
         setStatus('error');
@@ -55,33 +56,15 @@ export default function RegisterForm() {
     const user = data?.user;
 
     if (user) {
-      const { id: userId, identities } = user;
+      const { identities } = user;
 
+      // If no identities, it's likely an existing account
       if ((identities?.length ?? 0) === 0) {
-        // User already exists — redirect to signin
-        const signinUrl = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
-        window.location.href = signinUrl;
+        window.location.href = `/signin?accountExists=true&email=${encodeURIComponent(email)}`;
         return;
       }
 
-      // ✅ New user — create profile
-      const { error: profileError } = await supabase
-        .from('rbhc-table-profiles')
-        .insert([
-          {
-            user_id: userId, 
-            subscription_tier: 'queen',
-            created_at: new Date().toISOString(),
-          },
-        ]);
-
-      if (profileError) {
-        console.error('❌ Error creating profile:', profileError.message);
-        setErrorMessage('Account created, but profile setup failed.');
-        setStatus('error');
-        return;
-      }
-
+      // ✅ Profile is created automatically by trigger — just mark success
       setStatus('success');
       setPassword('');
       setConfirmPassword('');
