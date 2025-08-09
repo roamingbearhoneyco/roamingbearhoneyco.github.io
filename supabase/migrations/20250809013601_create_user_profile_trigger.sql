@@ -5,7 +5,7 @@ begin
   values (new.id, 'free', now());
   return new;
 end;
-$$ language plpgsql security definer SET search_path = 'public, auth';
+$$ language plpgsql security definer;
 
 create TRIGGER on_auth_user_created
 after insert on auth.users
