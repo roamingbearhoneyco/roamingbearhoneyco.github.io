@@ -1,12 +1,12 @@
 create or replace function public.handle_new_user()
-returns trigger as $$
+returns TRIGGER as $$
 begin
   insert into public."rbhc-table-profiles" (user_id, subscription_tier, created_at)
   values (new.id, 'free', now());
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer SET search_path = 'public, auth';
 
-create trigger on_auth_user_created
+create TRIGGER on_auth_user_created
 after insert on auth.users
 for each row execute procedure public.handle_new_user();
