@@ -4,5 +4,10 @@ import EmailCaptureModal from '../components/EmailCaptureModal.tsx';
 ---
 
 <Layout>
+  <!-- Fixed Background Image Layer -->
+  <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/bear_with hive_.png');"></div>
+  <!-- Gradient Overlay Layer -->
+  <div class="fixed inset-0 z-10 bg-gradient-to-b from-[#f5e7d0]/0 to-[#d7af79]/40"></div>
+
   <EmailCaptureModal client:only="react" />
 </Layout>
