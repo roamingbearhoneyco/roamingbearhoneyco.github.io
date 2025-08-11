@@ -33,7 +33,10 @@ export default function EmailCaptureModal() {
       const { error } = await supabase
         .from('rbhc-table-profiles')
         // Intentionally not setting user_id (NULL for email-only lead)
-        .insert({ email: emailAddress })
+        .insert({
+          email: emailAddress,
+          subscription_tier: 'free',
+        })
 
       if (error) {
         setErrorMessage(error.message)
