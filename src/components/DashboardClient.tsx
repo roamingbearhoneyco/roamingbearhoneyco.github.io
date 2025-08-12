@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 
 export default function DashboardClient() {
   const [email, setEmail] = useState<string | null>(null);
-  const [uuid, setUuid] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState<string | null>(null);
   const [tier, setTier] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -11,7 +11,7 @@ export default function DashboardClient() {
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         // Redirect to signin if not authenticated
         window.location.href = '/signin';
@@ -19,20 +19,20 @@ export default function DashboardClient() {
       }
 
       setEmail(user.email ?? null);
-      setUuid(user.id);
-      
-      // Fetch user profile data
+
+      // Fetch user profile data, now including first_name
       const { data: profile } = await supabase
         .from('rbhc-table-profiles')
-        .select('subscription_tier, created_at')
+        .select('first_name, subscription_tier, created_at')
         .eq('user_id', user.id)
         .single();
-      
+
       if (profile) {
+        setFirstName(profile.first_name ?? null);
         setTier(profile.subscription_tier ?? null);
         setCreatedAt(profile.created_at ?? null);
       }
-      
+
       setLoading(false);
     };
 
@@ -56,16 +56,16 @@ export default function DashboardClient() {
     <div className="card max-w-xl mx-auto space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-[var(--color-primary)]">
-          {email ? 'Welcome back!' : 'Loading...'}
+          {email ? `Welcome back${firstName ? `, ${firstName}` : ''}!` : 'Loading...'}
         </h1>
         {email && <p className="text-sm text-[var(--color-text-secondary)] mt-1">{email}</p>}
       </div>
 
-      {uuid && (
+      {firstName && (
         <div className="bg-[var(--color-background)] border border-[var(--color-accent)]/20 rounded-[var(--radius-md)] p-4 text-sm text-[var(--color-text-secondary)] space-y-2">
           <div>
-            <span className="font-medium text-[var(--color-text-primary)]">UUID:</span>{' '}
-            <span className="break-all">{uuid}</span>
+            <span className="font-medium text-[var(--color-text-primary)]">First Name:</span>{' '}
+            <span>{firstName}</span>
           </div>
           <div>
             <span className="font-medium text-[var(--color-text-primary)]">Subscription Tier:</span>{' '}
@@ -76,8 +76,7 @@ export default function DashboardClient() {
             <span>{createdAt ? new Date(createdAt + 'Z').toLocaleString(undefined, {
               dateStyle: 'medium',
               timeStyle: 'short',
-            }
-            ) : 'N/A'}</span>
+            }) : 'N/A'}</span>
           </div>
         </div>
       )}
