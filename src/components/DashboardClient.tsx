@@ -5,6 +5,7 @@ export default function DashboardClient() {
   const [email, setEmail] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [tier, setTier] = useState<string | null>(null);
+  const [subscribed, setSubscribed] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,13 +24,14 @@ export default function DashboardClient() {
       // Fetch user profile data, now including first_name
       const { data: profile } = await supabase
         .from('rbhc-table-profiles')
-        .select('first_name, subscription_tier, created_at')
+        .select('first_name, subscription_tier, subscribed, created_at')
         .eq('user_id', user.id)
         .single();
 
       if (profile) {
         setFirstName(profile.first_name ?? null);
         setTier(profile.subscription_tier ?? null);
+        setSubscribed(profile.subscribed ?? null);
         setCreatedAt(profile.created_at ?? null);
       }
 
@@ -72,6 +74,10 @@ export default function DashboardClient() {
             <span>{tier ?? 'N/A'}</span>
           </div>
           <div>
+            <span className="font-medium text-[var(--color-text-primary)]">Subscribed to Marketing/Emails:</span>{' '}
+            <span>{subscribed !== null ? (subscribed ? 'True' : 'False') : 'N/A'}</span>
+          </div>
+          <div>
             <span className="font-medium text-[var(--color-text-primary)]">Account Created:</span>{' '}
             <span>{createdAt ? new Date(createdAt + 'Z').toLocaleString(undefined, {
               dateStyle: 'medium',
@@ -80,6 +86,7 @@ export default function DashboardClient() {
           </div>
         </div>
       )}
+
 
       <p className="text-[var(--color-text-secondary)] text-center">
         Thanks for supporting Roaming Bear Honey Co 🍯
