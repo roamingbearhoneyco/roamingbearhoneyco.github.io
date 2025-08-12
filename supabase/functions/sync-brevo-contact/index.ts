@@ -3,10 +3,10 @@ const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
 const BREVO_LIST_ID = Number(Deno.env.get("BREVO_LIST_ID") || "3"); // your list ID here
 serve(async (req)=>{
   try {
-    const { email, tier } = await req.json();
-    if (!email || !tier) {
+    const { email, tier, first_name } = await req.json();
+    if (!email || !tier || !first_name) {
       return new Response(JSON.stringify({
-        error: "Missing email or tier"
+        error: "Missing email, tier or first name"
       }), {
         status: 400
       });
@@ -20,13 +20,12 @@ serve(async (req)=>{
       },
       body: JSON.stringify({
         email,
-        listIds: [
-          BREVO_LIST_ID
-        ],
+        listIds: [BREVO_LIST_ID],
         attributes: {
-          TIER: tier
+          TIER: tier,
+          FIRSTNAME: first_name,
         },
-        updateEnabled: true
+        updateEnabled: true,
       })
     });
     const data = await res.json();

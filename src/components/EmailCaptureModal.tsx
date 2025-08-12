@@ -5,14 +5,16 @@ type SubmissionState = 'idle' | 'submitting' | 'success' | 'error'
 
 export default function EmailCaptureModal() {
   const [isOpen, setIsOpen] = useState(true)
+  const [firstName, setFirstName] = useState('')
   const [emailAddress, setEmailAddress] = useState('')
+  const [consentGiven, setConsentGiven] = useState(false)
   const [submissionState, setSubmissionState] = useState<SubmissionState>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
-    // Auto-focus input when opened
+    // Auto-focus first field when opened
     if (isOpen) {
-      const input = document.getElementById('newsletter-email-input') as HTMLInputElement | null
+      const input = document.getElementById('newsletter-first-name-input') as HTMLInputElement | null
       input?.focus()
     }
   }, [isOpen])
@@ -21,6 +23,12 @@ export default function EmailCaptureModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // Consent must be given
+    if (!consentGiven) {
+      setErrorMessage('Please confirm you agree to receive marketing emails.')
+      setSubmissionState('error')
+      return
+    }
     if (!isValidEmail(emailAddress)) {
       setErrorMessage('Please enter a valid email address.')
       setSubmissionState('error')
@@ -34,6 +42,7 @@ export default function EmailCaptureModal() {
         .from('rbhc-table-profiles')
         // Intentionally not setting user_id (NULL for email-only lead)
         .insert({
+          first_name: firstName,
           email: emailAddress,
           subscription_tier: 'free',
         })
@@ -89,6 +98,20 @@ export default function EmailCaptureModal() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <label htmlFor="newsletter-first-name-input" className="block font-semibold text-white mb-1">
+                First Name
+              </label>
+              <input
+                id="newsletter-first-name-input"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Name"
+                className="w-full rounded-xl border border-[#e2c79e] bg-[rgba(255,255,255,0.9)] text-[#2c1c0f] px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#a05d35] focus:border-[#a05d35]"
+              />
+            </div>
+
+            <div>
               <label htmlFor="newsletter-email-input" className="block font-semibold text-white mb-1">
                 Email<span className="ml-1 text-[#d97706]">*</span>
               </label>
@@ -101,10 +124,24 @@ export default function EmailCaptureModal() {
                 className="w-full rounded-xl border border-[#e2c79e] bg-[rgba(255,255,255,0.9)] text-[#2c1c0f] px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#a05d35] focus:border-[#a05d35]"
                 required
               />
-              {submissionState === 'error' && errorMessage && (
-                <p className="mt-2 text-[#d97706] text-sm min-h-[1.2em]">{errorMessage}</p>
-              )}
             </div>
+
+            <div className="flex items-start gap-3">
+              <input
+                id="newsletter-consent"
+                type="checkbox"
+                checked={consentGiven}
+                onChange={(e) => setConsentGiven(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-[#e2c79e] text-[#a05d35] focus:ring-[#a05d35]"
+              />
+              <label htmlFor="newsletter-consent" className="text-white">
+                I agree to receive marketing emails and updates from Roaming Bear Honey Co.
+              </label>
+            </div>
+
+            {submissionState === 'error' && errorMessage && (
+              <p className="-mt-2 text-[#d97706] text-sm">{errorMessage}</p>
+            )}
 
             <button
               type="submit"
