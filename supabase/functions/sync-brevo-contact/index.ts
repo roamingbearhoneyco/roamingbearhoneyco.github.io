@@ -28,25 +28,52 @@ serve(async (req)=>{
         updateEnabled: true,
       })
     });
-    const data = await res.json();
-    if (!res.ok) {
+    // 1. HANDLE EXISTING USER (Success - No Content)
+    // Brevo returns 204 when it updates an existing contact with updateEnabled: true
+    if (res.status === 204) {
+      console.log(`Successfully updated existing contact: ${email}`);
       return new Response(JSON.stringify({
-        error: data
-      }), {
-        status: 400
+        message: "Contact updated successfully",
+        brevo_contact_id: null // Tell the DB trigger there's no NEW id to write
+      }), { 
+        status: 200, 
+        headers: { "Content-Type": "application/json" } 
       });
     }
-    // Return Brevo contact ID so the trigger function can update DB
-    return new Response(JSON.stringify({
-      brevo_contact_id: data.id
-    }), {
-      status: 200
+
+    // 2. HANDLE NEW USER (Success - Created)
+    // Brevo returns 201 when it creates a brand new contact
+    if (res.ok) {
+      const data = await res.json();
+      console.log(`Successfully created new contact: ${email} (ID: ${data.id})`);
+      return new Response(JSON.stringify({
+        brevo_contact_id: data.id 
+      }), { 
+        status: 200, 
+        headers: { "Content-Type": "application/json" } 
+      });
+    }
+
+    // 3. HANDLE API ERRORS (400, 401, 403, etc.)
+    const errorData = await res.json();
+    console.error("Brevo API Error:", errorData);
+    return new Response(JSON.stringify({ 
+      error: "Brevo API Error", 
+      details: errorData 
+    }), { 
+      status: 400, 
+      headers: { "Content-Type": "application/json" } 
     });
+
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error.message
-    }), {
-      status: 500
+    // This catches the SyntaxError that was causing your 500s
+    console.error("Edge Function Crash:", error.message);
+    return new Response(JSON.stringify({ 
+      error: "Internal Server Error", 
+      message: error.message 
+    }), { 
+      status: 500, 
+      headers: { "Content-Type": "application/json" } 
     });
   }
 });
