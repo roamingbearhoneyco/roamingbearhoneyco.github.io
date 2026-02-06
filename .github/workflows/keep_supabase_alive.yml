@@ -13,17 +13,16 @@ jobs:
     steps:
       - name: Ping Brevo Sync Function
         env:
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+          # This maps your GitHub Secret to a variable the script can use
+          ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }} 
         run: |
-          # The payload matches our Guard Clause email
           printf '{"email":"healthcheck@roamingbearhoneyco.com"}' > ping-body.json
 
-          # Updated to your roqwrtsmcisdxhgthpem project
           RESPONSE=$(curl --silent --show-error -X POST https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo-contact \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $PUBLIC_SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $ANON_KEY" \
             --data-binary @ping-body.json)
-
+          
           echo "Ping response: $RESPONSE"
           
           if [[ "$RESPONSE" != *'"status":"awake"'* ]]; then
