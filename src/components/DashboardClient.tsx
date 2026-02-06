@@ -48,7 +48,7 @@ export default function DashboardClient() {
 
   if (loading) {
     return (
-      <div className="card max-w-xl mx-auto text-center">
+      <div className="card glass max-w-xl mx-auto space-y-6">
         <p className="text-[var(--color-text-secondary)]">Loading...</p>
       </div>
     );

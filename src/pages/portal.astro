@@ -1,28 +1,27 @@
-
 ---
 import Layout from '../layouts/Layout.astro';
 import DashboardClient from '../components/DashboardClient.tsx';
 ---
 
 <Layout>
-  <!-- Fixed Background Image Layer -->
   <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/comb.jpg');"></div>
-
-  <!-- Gradient Overlay Layer -->
   <div class="fixed inset-0 z-10 bg-gradient-to-b from-[var(--color-soft-amber)]/90 to-[var(--color-golden-honey)]/50"></div>
 
-  <!-- Hero Section -->
-  <section class="relative z-20 flex flex-col items-center text-center pt-24 pb-12 min-h-[40vh] fade-in-up">
-  <h1 class="hero-title">
-    Member Portal
-  </h1>
-  <p class="hero-subtitle text-black !mb-0"> Welcome to your Roaming Bear Honey Co. dashboard
-  </p>
-</section>
+  <section class="relative z-20 pt-32 pb-20 px-4 text-center fade-in-up">
+    <h1 class="hero-title !mb-2">
+      Member Portal
+    </h1>
+    <p class="hero-subtitle text-black !max-w-xl mx-auto !mb-0">
+      Welcome back to your Roaming Bear Honey Co. dashboard. 
+      Manage your subscription and profile details below.
+    </p>
+  </section>
 
-<section class="relative z-30 px-4 sm:px-6 -mt-16">
-  <div class="container-responsive">
-    <DashboardClient client:only="react" />
-  </div>
-</section>
+  <section class="relative z-30 px-4 sm:px-6 -mt-12 pb-20">
+    <div class="container-responsive">
+      <div class="max-w-2xl mx-auto">
+        <DashboardClient client:only="react" />
+      </div>
+    </div>
+  </section>
 </Layout>
