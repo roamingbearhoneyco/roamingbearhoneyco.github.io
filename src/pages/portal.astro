@@ -12,19 +12,17 @@ import DashboardClient from '../components/DashboardClient.tsx';
   <div class="fixed inset-0 z-10 bg-gradient-to-b from-[var(--color-soft-amber)]/90 to-[var(--color-golden-honey)]/50"></div>
 
   <!-- Hero Section -->
-  <section class="hero fade-in-up">
-    <h1 class="hero-title">
-      Member Portal
-    </h1>
-    <p class="hero-subtitle text-black">
-      Welcome to your Roaming Bear Honey Co. dashboard
-    </p>
-  </section>
+  <section class="relative z-20 flex flex-col items-center text-center pt-24 pb-12 min-h-[40vh] fade-in-up">
+  <h1 class="hero-title">
+    Member Portal
+  </h1>
+  <p class="hero-subtitle text-black !mb-0"> Welcome to your Roaming Bear Honey Co. dashboard
+  </p>
+</section>
 
-  <!-- Dashboard Content Section -->
-  <section class="relative z-30 px-4 sm:px-6">
-    <div class="container-responsive">
-      <DashboardClient client:only="react" />
-    </div>
-  </section>
+<section class="relative z-30 px-4 sm:px-6 -mt-16">
+  <div class="container-responsive">
+    <DashboardClient client:only="react" />
+  </div>
+</section>
 </Layout>
