@@ -21,7 +21,7 @@ jobs:
           # Updated to your roqwrtsmcisdxhgthpem project
           RESPONSE=$(curl --silent --show-error -X POST https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo-contact \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $PUBLIC_SUPABASE_ANON_KEY" \
             --data-binary @ping-body.json)
 
           echo "Ping response: $RESPONSE"
