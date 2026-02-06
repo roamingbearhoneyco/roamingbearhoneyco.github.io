@@ -1,4 +1,4 @@
-name: Keep Brevo Sync Alive
+name: Keep Supabase Project Alive
 permissions: read-all
 
 on:
@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Ping Brevo Sync Function
         env:
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
         run: |
           # The payload matches our Guard Clause email
           printf '{"email":"healthcheck@roamingbearhoneyco.com"}' > ping-body.json
