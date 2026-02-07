@@ -385,6 +385,36 @@
   .shadow-brand {
     box-shadow: 0 10px 25px -5px rgba(160, 93, 53, 0.1);
   }
+  
+  /* Section Spacing Utilities */
+  .section-spacing {
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-3xl);
+  }
+  
+  .section-spacing-lg {
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-3xl);
+  }
+  
+  .section-spacing-md {
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
+  }
+  
+  .section-spacing-sm {
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+  }
+  
+  /* Responsive section spacing */
+  @media (min-width: 640px) {
+    .section-spacing,
+    .section-spacing-lg {
+      padding-top: var(--space-3xl);
+      padding-bottom: var(--space-3xl);
+    }
+  }
 }
 
 /* ===== ANIMATIONS ===== */
