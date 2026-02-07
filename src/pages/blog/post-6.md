@@ -5,7 +5,7 @@ date: 08-05-2025
 author: Justin McIntyre
 image: {
   src: "/images/post-6.jpg",
-  alt: "A picture of a coder",
+  alt: "A picture of a ball of bees",
 }
 description: Too much of a good thing is still, too much.
 draft: false
