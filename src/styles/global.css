@@ -407,11 +407,22 @@
     padding-bottom: var(--space-xl);
   }
   
+  /* Hero-to-content transition spacing (compact top for better visual flow) */
+  .section-hero-content {
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-3xl);
+  }
+  
   /* Responsive section spacing */
   @media (min-width: 640px) {
     .section-spacing,
     .section-spacing-lg {
       padding-top: var(--space-3xl);
+      padding-bottom: var(--space-3xl);
+    }
+    
+    .section-hero-content {
+      padding-top: var(--space-2xl);
       padding-bottom: var(--space-3xl);
     }
   }

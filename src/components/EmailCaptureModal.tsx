@@ -62,9 +62,9 @@ export default function EmailCaptureModal() {
   if (!isOpen) return null
 
   return (
-    <div className="relative z-20 flex items-start justify-center min-h-[100vh] pt-24 pb-16 px-4">
+    <div className="relative z-20 flex items-center justify-center min-h-screen px-4">
       {/* Card */}
-      <div className="w-full max-w-xl rounded-2xl border border-[rgba(215,175,121,0.10)] bg-[rgba(255,255,255,0.6)] backdrop-blur-md shadow-[0_4px_24px_rgba(44,28,15,0.07),_0_1.5px_8px_rgba(160,93,53,0.04)] p-6 sm:p-8">
+      <div className="w-full max-w-xl rounded-2xl border border-[rgba(215,175,121,0.15)] bg-[rgba(255,255,255,0.45)] backdrop-blur-xl shadow-[0_8px_32px_rgba(44,28,15,0.12),_0_2px_12px_rgba(160,93,53,0.08)] p-6 sm:p-8">
         <button
           type="button"
           aria-label="Close"
