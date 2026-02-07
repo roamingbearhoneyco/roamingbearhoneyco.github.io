@@ -38,17 +38,37 @@ export default function EmailCaptureModal() {
     setErrorMessage('')
 
     try {
-      const { error } = await supabase
+      // Generate a UUID for the email-only lead
+      const leadUuid = crypto.randomUUID()
+
+      // Insert profile with UUID (not yet authenticated)
+      const { error: profileError } = await supabase
         .from('rbhc-table-profiles')
-        // Intentionally not setting user_id (NULL for email-only lead)
         .insert({
+          user_id: leadUuid,
           first_name: firstName,
           email: emailAddress,
-          subscription_tier: 'free',
         })
 
-      if (error) {
-        setErrorMessage(error.message)
+      if (profileError) {
+        setErrorMessage(profileError.message)
+        setSubmissionState('error')
+        return
+      }
+
+      // Insert FREE subscription for this lead
+      // Tier 1 is 'free' based on migration seed data
+      const { error: subError } = await supabase
+        .from('subscriptions')
+        .insert({
+          user_id: leadUuid,
+          tier_id: 1,
+          billing_cycle: 1,
+          status: 'active',
+        })
+
+      if (subError) {
+        setErrorMessage(subError.message)
         setSubmissionState('error')
       } else {
         setSubmissionState('success')
