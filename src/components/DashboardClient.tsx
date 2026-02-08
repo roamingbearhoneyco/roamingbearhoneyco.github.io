@@ -56,64 +56,70 @@ export default function DashboardClient() {
   const [saveLoading, setSaveLoading] = useState(false)
   const [message, setMessage] = useState<{ type: string; text: string } | null>(null)
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          window.location.href = '/signin'
-          return
-        }
-
-        const { data: profileData, error: profileError } = await supabase
-          .from('rbhc-table-profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single()
-
-        if (profileError || !profileData) {
-          setLoading(false)
-          return
-        }
-
-        setProfile(profileData)
-        setEditName(profileData.first_name || '')
-        setEditMerch(profileData.merch_preferences || [])
-
-        const [subResponse, orderResponse] = await Promise.all([
-          supabase
-            .from('subscriptions')
-            .select(`*, subscription_tiers:tier_id (name, display_name)`)
-            .eq('profile_id', profileData.id)
-            .maybeSingle(),
-          supabase
-            .from('orders')
-            .select(`*, order_items (*, products (*))`)
-            .eq('profile_id', profileData.id)
-            .order('created_at', { ascending: false })
-        ])
-
-        if (subResponse.data) {
-          const tier = Array.isArray(subResponse.data.subscription_tiers) 
-            ? subResponse.data.subscription_tiers[0] 
-            : subResponse.data.subscription_tiers;
-
-          setSubscription({
-            ...subResponse.data,
-            subscription_tiers: tier
-          } as Subscription)
-        }
-
-        if (orderResponse.data) {
-          setOrders(orderResponse.data)
-        }
-
-      } catch (err) {
-        console.error('Error loading user data:', err)
-      } finally {
-        setLoading(false)
+  const loadUserData = async () => {
+    setLoading(true)
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        window.location.href = '/signin'
+        return
       }
+
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('rbhc-table-profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle() // Using maybeSingle to avoid 406 errors
+
+      if (profileError || !profileData) {
+        console.error('Profile Error:', profileError)
+        setLoading(false)
+        return
+      }
+
+      setProfile(profileData)
+      setEditName(profileData.first_name || '')
+      setEditMerch(profileData.merch_preferences || [])
+
+      // Fetch related data
+      const [subResponse, orderResponse] = await Promise.all([
+        supabase
+          .from('subscriptions')
+          .select(`*, subscription_tiers:tier_id (name, display_name)`)
+          .eq('profile_id', profileData.id)
+          .maybeSingle(),
+        supabase
+          .from('orders')
+          .select(`*, order_items (*, products (*))`)
+          .eq('profile_id', profileData.id)
+          .order('created_at', { ascending: false })
+      ])
+
+      if (subResponse.data) {
+        const tier = Array.isArray(subResponse.data.subscription_tiers) 
+          ? subResponse.data.subscription_tiers[0] 
+          : subResponse.data.subscription_tiers;
+
+        setSubscription({
+          ...subResponse.data,
+          subscription_tiers: tier
+        } as Subscription)
+      }
+
+      if (orderResponse.data) {
+        setOrders(orderResponse.data)
+      }
+
+    } catch (err) {
+      console.error('Critical Dashboard Error:', err)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     loadUserData()
   }, [])
 
@@ -130,7 +136,6 @@ export default function DashboardClient() {
     setMessage(null)
 
     try {
-      // DB handles the "Friend" default and "First Name" splitting
       const { error } = await supabase
         .from('rbhc-table-profiles')
         .update({
@@ -146,13 +151,31 @@ export default function DashboardClient() {
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
       setTimeout(() => setMessage(null), 3000)
     } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to update profile' })
+      setMessage({ type: 'error', text: 'Update failed. Please check your connection.' })
     } finally {
       setSaveLoading(false)
     }
   }
 
-  // ... (rest of the component: handleUpgrade, handleSignOut, Loading/Error screens)
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-secondary)] mx-auto mb-4"></div>
+        <p className="text-[var(--color-text-secondary)]">Syncing your dashboard...</p>
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center card">
+        <p className="text-red-600 mb-4">We couldn't find your member profile.</p>
+        <button onClick={() => window.location.href = '/signin'} className="btn btn-primary">
+          Back to Sign In
+        </button>
+      </div>
+    )
+  }
 
   const tabList: { id: TabType; label: string }[] = [
     { id: 'subscription', label: 'Subscription' },
@@ -163,7 +186,7 @@ export default function DashboardClient() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <div className="card">
         <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
           Welcome back, {profile.first_name}!
@@ -175,13 +198,14 @@ export default function DashboardClient() {
 
       {message && (
         <div className={`p-4 rounded-lg ${
-          message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          message.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'
         }`}>
           {message.text}
         </div>
       )}
 
-      <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-gray-200 overflow-x-auto scrollbar-hide">
         {tabList.map(tab => (
           <button
             key={tab.id}
@@ -197,14 +221,15 @@ export default function DashboardClient() {
         ))}
       </div>
 
-      <div>
+      {/* Tab Content */}
+      <div className="mt-6">
         {activeTab === 'subscription' && (
           subscription ? (
             <SubscriptionManager subscription={subscription} />
           ) : (
-            <div className="card text-center py-8">
-               <p className="mb-4">No active subscription found.</p>
-               <button onClick={() => setActiveTab('upgrade')} className="btn btn-primary">Choose a Plan</button>
+            <div className="card text-center py-12">
+               <p className="text-lg mb-6">You don't have an active subscription yet.</p>
+               <button onClick={() => setActiveTab('upgrade')} className="btn btn-primary">Explore Membership Plans</button>
             </div>
           )
         )}
@@ -212,89 +237,80 @@ export default function DashboardClient() {
         {activeTab === 'upgrade' && (
           <TierSelector 
             currentTierName={subscription?.subscription_tiers?.name || 'None'}
-            onUpgrade={handleUpgrade}
+            onUpgrade={(tierId, cycle) => console.log('Upgrade:', tierId, cycle)}
           />
         )}
 
         {activeTab === 'profile' && (
-          <div className="card space-y-4">
+          <div className="card space-y-6">
             {editingProfile ? (
               <div className="space-y-4">
-                <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Edit Profile</h3>
+                <h3 className="text-xl font-bold">Edit Profile</h3>
                 <div>
-                  <label className="form-label">Email</label>
-                  <input type="email" value={profile.email} disabled className="form-input opacity-50 cursor-not-allowed" />
+                  <label className="block text-sm font-medium mb-1">Email (Immutable)</label>
+                  <input type="email" value={profile.email} disabled className="form-input bg-gray-50 opacity-70 cursor-not-allowed" />
                 </div>
                 <div>
-                  <label className="form-label">First Name</label>
+                  <label className="block text-sm font-medium mb-1">First Name</label>
                   <input 
                     type="text" 
                     value={editName} 
                     onChange={e => setEditName(e.target.value)} 
                     className="form-input" 
+                    placeholder="Enter your name"
                   />
                 </div>
-                
                 <div>
-                  <label className="form-label mb-2 block">Merch Preferences</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <label className="block text-sm font-medium mb-2">Merch Preferences</label>
+                  <div className="grid grid-cols-2 gap-3">
                     {['T-Shirts', 'Hoodies', 'Hats', 'Stickers'].map((item) => (
-                      <label key={item} className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <label key={item} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                         <input
                           type="checkbox"
                           checked={editMerch.includes(item)}
                           onChange={(e) => {
-                            if (e.target.checked) {
-                              setEditMerch([...editMerch, item])
-                            } else {
-                              setEditMerch(editMerch.filter(i => i !== item))
-                            }
+                            setEditMerch(prev => e.target.checked ? [...prev, item] : prev.filter(i => i !== item))
                           }}
-                          className="rounded border-gray-300 text-[var(--color-secondary)] focus:ring-[var(--color-secondary)]"
+                          className="mr-3 h-4 w-4 text-[var(--color-secondary)] focus:ring-[var(--color-secondary)] border-gray-300 rounded"
                         />
-                        <span className="text-sm font-medium">{item}</span>
+                        <span className="text-sm">{item}</span>
                       </label>
                     ))}
                   </div>
                 </div>
-
-                <div className="flex gap-3">
-                  <button onClick={() => setEditingProfile(false)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
+                <div className="flex gap-3 pt-4">
+                  <button onClick={() => setEditingProfile(false)} className="flex-1 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
                   <button onClick={handleSaveProfile} disabled={saveLoading} className="flex-1 btn btn-primary">
                     {saveLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Profile Information</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-bold">Profile Details</h3>
+                  <button onClick={() => setEditingProfile(true)} className="text-[var(--color-secondary)] font-semibold hover:underline">Edit</button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-xs uppercase text-[var(--color-text-secondary)]">Email</p>
-                    <p className="font-semibold">{profile.email}</p>
+                    <p className="text-xs uppercase text-gray-500 font-bold mb-1">Email Address</p>
+                    <p className="text-lg">{profile.email}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase text-[var(--color-text-secondary)]">First Name</p>
-                    <p className="font-semibold">{profile.first_name}</p>
+                    <p className="text-xs uppercase text-gray-500 font-bold mb-1">First Name</p>
+                    <p className="text-lg">{profile.first_name}</p>
                   </div>
                 </div>
-
-                <div className="mt-2 pt-4 border-t border-gray-100">
-                  <p className="text-xs uppercase text-[var(--color-text-secondary)] mb-2">Merch Preferences</p>
+                <div className="pt-4 border-t">
+                  <p className="text-xs uppercase text-gray-500 font-bold mb-3">Your Merch Preferences</p>
                   <div className="flex flex-wrap gap-2">
-                    {profile.merch_preferences && profile.merch_preferences.length > 0 ? (
-                      profile.merch_preferences.map(item => (
-                        <span key={item} className="px-3 py-1 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] text-xs font-bold rounded-full border border-[var(--color-secondary)]/20">
-                          {item}
-                        </span>
-                      ))
-                    ) : (
-                      <p className="text-sm italic text-gray-400">No preferences set</p>
-                    )}
+                    {profile.merch_preferences?.length ? profile.merch_preferences.map(item => (
+                      <span key={item} className="px-3 py-1 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] text-sm font-medium rounded-full border border-[var(--color-secondary)]/20">
+                        {item}
+                      </span>
+                    )) : <p className="text-gray-400 italic">No preferences selected</p>}
                   </div>
                 </div>
-
-                <button onClick={() => setEditingProfile(true)} className="btn btn-secondary mt-4">Edit Profile</button>
               </div>
             )}
           </div>
@@ -303,9 +319,13 @@ export default function DashboardClient() {
         {activeTab === 'orders' && <OrderHistory orders={orders} />}
 
         {activeTab === 'settings' && (
-          <div className="card">
-            <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')} className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-              Sign Out
+          <div className="card border-red-100">
+            <h3 className="text-xl font-bold mb-4">Account Settings</h3>
+            <button 
+              onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')} 
+              className="w-full px-4 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-colors"
+            >
+              Sign Out of RBHC
             </button>
           </div>
         )}
