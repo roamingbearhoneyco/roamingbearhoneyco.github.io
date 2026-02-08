@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 5rjTk83Pg8bjnfpjH8AdVPFkhTWWm7BaxhZObo9D2rTU2VC3i10TNT3ekLtKdKU
+\restrict NqTiyhbOAf4sMbZyhNDZbxtL3890UDt80WMvoZT91uDviZO9qWIhGoxIyHczNVc
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -809,23 +809,86 @@ END;$$;
 
 
 --
+-- Name: create_subscription_for_email_lead(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.create_subscription_for_email_lead() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  free_tier_id BIGINT;
+BEGIN
+  -- Get the 'free' tier ID
+  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE name = 'free' LIMIT 1;
+  
+  IF free_tier_id IS NULL THEN
+    RAISE LOG 'Free tier not found in subscription_tiers table';
+    RETURN NEW;
+  END IF;
+  
+  -- Create subscription for email-only leads (user_id is NOT NULL but came from onboard)
+  -- This happens for both:
+  -- 1. New email-only leads (INSERT with user_id from onboard UUID)
+  -- 2. Existing leads getting authenticated (UPDATE with user_id from auth)
+  INSERT INTO public.subscriptions (user_id, tier_id, billing_cycle, status)
+  VALUES (NEW.user_id, free_tier_id, 1, 'active')
+  ON CONFLICT (user_id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: create_subscription_for_new_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.create_subscription_for_new_user() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  free_tier_id BIGINT;
+BEGIN
+  -- Get the 'free' tier ID
+  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE name = 'free' LIMIT 1;
+  
+  IF free_tier_id IS NULL THEN
+    RAISE LOG 'Free tier not found in subscription_tiers table';
+    RETURN NEW;
+  END IF;
+  
+  -- Create subscription for this user only if they don't already have one
+  INSERT INTO public.subscriptions (user_id, tier_id, billing_cycle, status)
+  VALUES (NEW.user_id, free_tier_id, 1, 'active')
+  ON CONFLICT (user_id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION public.handle_new_user() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public, auth'
-    AS $$begin
-  insert into public."rbhc-table-profiles" (user_id, subscription_tier, created_at, email)
-  values (new.id, 'conditional', now(), new.email)
-  on conflict (email) do update
-  set 
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  INSERT INTO public."rbhc-table-profiles" (user_id, created_at, email)
+  VALUES (new.id, now(), new.email)
+  ON CONFLICT (email) DO UPDATE
+  SET 
     user_id = excluded.user_id,
-    subscription_tier = excluded.subscription_tier
-  where public."rbhc-table-profiles".user_id is null;
+    created_at = COALESCE(public."rbhc-table-profiles".created_at, excluded.created_at)
+  WHERE public."rbhc-table-profiles".user_id IS NULL;
 
-  return new;
-end;$$;
+  RETURN new;
+END;
+$$;
 
 
 --
@@ -3120,12 +3183,116 @@ COMMENT ON COLUMN auth.users.is_sso_user IS 'Auth: Set this column to true when 
 
 
 --
+-- Name: order_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.order_items (
+    id bigint NOT NULL,
+    order_id bigint NOT NULL,
+    product_id bigint NOT NULL,
+    quantity integer DEFAULT 1 NOT NULL,
+    price_paid integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.order_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.order_items_id_seq OWNED BY public.order_items.id;
+
+
+--
+-- Name: orders; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.orders (
+    id bigint NOT NULL,
+    user_id uuid NOT NULL,
+    status character varying(50) DEFAULT 'pending'::character varying NOT NULL,
+    tracking_number character varying(255),
+    created_at timestamp with time zone DEFAULT now(),
+    shipped_at timestamp with time zone,
+    delivered_at timestamp with time zone,
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: orders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.orders_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.orders_id_seq OWNED BY public.orders.id;
+
+
+--
+-- Name: products; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.products (
+    id bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    type character varying(50) NOT NULL,
+    description text,
+    price integer NOT NULL,
+    dropship_sku character varying(255),
+    dropship_supplier character varying(255),
+    is_active boolean DEFAULT true,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: products_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.products_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: products_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.products_id_seq OWNED BY public.products.id;
+
+
+--
 -- Name: rbhc-table-profiles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public."rbhc-table-profiles" (
     user_id uuid DEFAULT auth.uid(),
-    subscription_tier text DEFAULT ''::text NOT NULL,
     created_at timestamp without time zone DEFAULT now() NOT NULL,
     id bigint NOT NULL,
     email text,
@@ -3162,6 +3329,80 @@ CREATE SEQUENCE public."rbhc-table-profiles_id_seq"
 --
 
 ALTER SEQUENCE public."rbhc-table-profiles_id_seq" OWNED BY public."rbhc-table-profiles".id;
+
+
+--
+-- Name: subscription_tiers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.subscription_tiers (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    display_name character varying(100) NOT NULL,
+    description text,
+    price_monthly integer DEFAULT 0 NOT NULL,
+    price_6month integer DEFAULT 0 NOT NULL,
+    price_yearly integer DEFAULT 0 NOT NULL,
+    benefits jsonb DEFAULT '{}'::jsonb,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: subscription_tiers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.subscription_tiers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: subscription_tiers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.subscription_tiers_id_seq OWNED BY public.subscription_tiers.id;
+
+
+--
+-- Name: subscriptions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.subscriptions (
+    id bigint NOT NULL,
+    user_id uuid NOT NULL,
+    tier_id bigint NOT NULL,
+    stripe_customer_id character varying(255),
+    stripe_subscription_id character varying(255),
+    billing_cycle integer DEFAULT 1 NOT NULL,
+    status character varying(50) DEFAULT 'active'::character varying NOT NULL,
+    next_renewal_date timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: subscriptions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.subscriptions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: subscriptions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.subscriptions_id_seq OWNED BY public.subscriptions.id;
 
 
 --
@@ -3395,10 +3636,45 @@ ALTER TABLE ONLY auth.refresh_tokens ALTER COLUMN id SET DEFAULT nextval('auth.r
 
 
 --
+-- Name: order_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.order_items ALTER COLUMN id SET DEFAULT nextval('public.order_items_id_seq'::regclass);
+
+
+--
+-- Name: orders id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.orders ALTER COLUMN id SET DEFAULT nextval('public.orders_id_seq'::regclass);
+
+
+--
+-- Name: products id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.products ALTER COLUMN id SET DEFAULT nextval('public.products_id_seq'::regclass);
+
+
+--
 -- Name: rbhc-table-profiles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public."rbhc-table-profiles" ALTER COLUMN id SET DEFAULT nextval('public."rbhc-table-profiles_id_seq"'::regclass);
+
+
+--
+-- Name: subscription_tiers id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscription_tiers ALTER COLUMN id SET DEFAULT nextval('public.subscription_tiers_id_seq'::regclass);
+
+
+--
+-- Name: subscriptions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscriptions ALTER COLUMN id SET DEFAULT nextval('public.subscriptions_id_seq'::regclass);
 
 
 --
@@ -3634,11 +3910,67 @@ ALTER TABLE ONLY auth.users
 
 
 --
+-- Name: order_items order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.order_items
+    ADD CONSTRAINT order_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.products
+    ADD CONSTRAINT products_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: rbhc-table-profiles rbhc-table-profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public."rbhc-table-profiles"
     ADD CONSTRAINT "rbhc-table-profiles_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: subscription_tiers subscription_tiers_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscription_tiers
+    ADD CONSTRAINT subscription_tiers_name_key UNIQUE (name);
+
+
+--
+-- Name: subscription_tiers subscription_tiers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscription_tiers
+    ADD CONSTRAINT subscription_tiers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: subscriptions subscriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscriptions
+    ADD CONSTRAINT subscriptions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: subscriptions subscriptions_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscriptions
+    ADD CONSTRAINT subscriptions_user_id_key UNIQUE (user_id);
 
 
 --
@@ -4090,10 +4422,108 @@ CREATE INDEX users_is_anonymous_idx ON auth.users USING btree (is_anonymous);
 
 
 --
+-- Name: idx_order_items_order_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_order_items_order_id ON public.order_items USING btree (order_id);
+
+
+--
+-- Name: idx_order_items_product_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_order_items_product_id ON public.order_items USING btree (product_id);
+
+
+--
+-- Name: idx_orders_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_orders_created_at ON public.orders USING btree (created_at);
+
+
+--
+-- Name: idx_orders_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_orders_status ON public.orders USING btree (status);
+
+
+--
+-- Name: idx_orders_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_orders_user_id ON public.orders USING btree (user_id);
+
+
+--
+-- Name: idx_products_is_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_products_is_active ON public.products USING btree (is_active);
+
+
+--
+-- Name: idx_products_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_products_type ON public.products USING btree (type);
+
+
+--
 -- Name: idx_profiles_email; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX idx_profiles_email ON public."rbhc-table-profiles" USING btree (email);
+
+
+--
+-- Name: idx_subscription_tiers_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_subscription_tiers_name ON public.subscription_tiers USING btree (name);
+
+
+--
+-- Name: idx_subscriptions_next_renewal_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_subscriptions_next_renewal_date ON public.subscriptions USING btree (next_renewal_date);
+
+
+--
+-- Name: idx_subscriptions_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_subscriptions_status ON public.subscriptions USING btree (status);
+
+
+--
+-- Name: idx_subscriptions_stripe_customer_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_subscriptions_stripe_customer_id ON public.subscriptions USING btree (stripe_customer_id);
+
+
+--
+-- Name: idx_subscriptions_stripe_subscription_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_subscriptions_stripe_subscription_id ON public.subscriptions USING btree (stripe_subscription_id);
+
+
+--
+-- Name: idx_subscriptions_tier_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_subscriptions_tier_id ON public.subscriptions USING btree (tier_id);
+
+
+--
+-- Name: idx_subscriptions_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_subscriptions_user_id ON public.subscriptions USING btree (user_id);
 
 
 --
@@ -4178,6 +4608,13 @@ CREATE UNIQUE INDEX vector_indexes_name_bucket_id_idx ON storage.vector_indexes 
 --
 
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+
+--
+-- Name: rbhc-table-profiles on_profile_create_or_update_subscription; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER on_profile_create_or_update_subscription AFTER INSERT OR UPDATE ON public."rbhc-table-profiles" FOR EACH ROW WHEN ((new.user_id IS NOT NULL)) EXECUTE FUNCTION public.create_subscription_for_email_lead();
 
 
 --
@@ -4351,11 +4788,51 @@ ALTER TABLE ONLY auth.sso_domains
 
 
 --
+-- Name: order_items order_items_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.order_items
+    ADD CONSTRAINT order_items_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE CASCADE;
+
+
+--
+-- Name: order_items order_items_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.order_items
+    ADD CONSTRAINT order_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id);
+
+
+--
+-- Name: orders orders_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: rbhc-table-profiles rbhc-table-profiles_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public."rbhc-table-profiles"
     ADD CONSTRAINT "rbhc-table-profiles_user_id_fkey" FOREIGN KEY (user_id) REFERENCES auth.users(id);
+
+
+--
+-- Name: subscriptions subscriptions_tier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscriptions
+    ADD CONSTRAINT subscriptions_tier_id_fkey FOREIGN KEY (tier_id) REFERENCES public.subscription_tiers(id);
+
+
+--
+-- Name: subscriptions subscriptions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscriptions
+    ADD CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
 
 --
@@ -4509,10 +4986,84 @@ CREATE POLICY "Enable users to view their own data only" ON public."rbhc-table-p
 
 
 --
+-- Name: products Everyone can view products; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Everyone can view products" ON public.products FOR SELECT USING ((is_active = true));
+
+
+--
+-- Name: subscription_tiers Everyone can view subscription tiers; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Everyone can view subscription tiers" ON public.subscription_tiers FOR SELECT USING (true);
+
+
+--
+-- Name: subscriptions Users can update their own subscription; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can update their own subscription" ON public.subscriptions FOR UPDATE USING ((auth.uid() = user_id));
+
+
+--
+-- Name: order_items Users can view order items for their orders; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can view order items for their orders" ON public.order_items FOR SELECT USING ((order_id IN ( SELECT orders.id
+   FROM public.orders
+  WHERE (orders.user_id = auth.uid()))));
+
+
+--
+-- Name: orders Users can view their own orders; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can view their own orders" ON public.orders FOR SELECT USING ((auth.uid() = user_id));
+
+
+--
+-- Name: subscriptions Users can view their own subscription; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can view their own subscription" ON public.subscriptions FOR SELECT USING ((auth.uid() = user_id));
+
+
+--
+-- Name: order_items; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: orders; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: products; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: rbhc-table-profiles; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
 ALTER TABLE public."rbhc-table-profiles" ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: subscription_tiers; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.subscription_tiers ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: subscriptions; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: messages; Type: ROW SECURITY; Schema: realtime; Owner: -
@@ -4631,5 +5182,5 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 5rjTk83Pg8bjnfpjH8AdVPFkhTWWm7BaxhZObo9D2rTU2VC3i10TNT3ekLtKdKU
+\unrestrict NqTiyhbOAf4sMbZyhNDZbxtL3890UDt80WMvoZT91uDviZO9qWIhGoxIyHczNVc
 

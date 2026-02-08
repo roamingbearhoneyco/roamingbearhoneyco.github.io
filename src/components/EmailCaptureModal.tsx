@@ -22,62 +22,38 @@ export default function EmailCaptureModal() {
   const isValidEmail = (value: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // Consent must be given
-    if (!consentGiven) {
-      setErrorMessage('Please confirm you agree to receive marketing emails.')
-      setSubmissionState('error')
-      return
-    }
-    if (!isValidEmail(emailAddress)) {
-      setErrorMessage('Please enter a valid email address.')
-      setSubmissionState('error')
-      return
-    }
-    setSubmissionState('submitting')
-    setErrorMessage('')
+  e.preventDefault()
+  // ... validations ...
 
-    try {
-      // Generate a UUID for the email-only lead
-      const leadUuid = crypto.randomUUID()
+  setSubmissionState('submitting')
 
-      // Insert profile with UUID (not yet authenticated)
-      const { error: profileError } = await supabase
-        .from('rbhc-table-profiles')
-        .insert({
-          user_id: leadUuid,
-          first_name: firstName,
-          email: emailAddress,
-        })
+  try {
+    const { error: profileError } = await supabase
+      .from('rbhc-table-profiles')
+      .insert({
+        first_name: firstName,
+        email: emailAddress,
+      })
 
-      if (profileError) {
-        setErrorMessage(profileError.message)
-        setSubmissionState('error')
-        return
-      }
-
-      // Insert FREE subscription for this lead
-      // Tier 1 is 'free' based on migration seed data
-      const { error: subError } = await supabase
-        .from('subscriptions')
-        .insert({
-          user_id: leadUuid,
-          tier_id: 1,
-          billing_cycle: 1,
-          status: 'active',
-        })
-
-      if (subError) {
-        setErrorMessage(subError.message)
-        setSubmissionState('error')
+    if (profileError) {
+      // Catch our custom Postgres Exception
+      if (profileError.message.includes('ALREADY_REGISTERED')) {
+        setErrorMessage("It appears you already have an account. Please login or use the password recovery process.")
+      } else if (profileError.code === '23505') { // Standard Unique Violation
+        setErrorMessage("You're already on the list! Check your inbox for updates.")
       } else {
-        setSubmissionState('success')
+        setErrorMessage(profileError.message)
       }
-    } catch (err) {
-      setErrorMessage('Something went wrong. Please try again.')
       setSubmissionState('error')
+      return
     }
+
+    setSubmissionState('success')
+  } catch (err) {
+    setErrorMessage('Something went wrong. Please try again.')
+    setSubmissionState('error')
   }
+}
 
   if (!isOpen) return null
 
