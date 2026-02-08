@@ -136,7 +136,7 @@ export default function EmailCaptureModal() {
             </div>
 
             {submissionState === 'error' && errorMessage && (
-              <p className="-mt-2 text-[#d97706] text-sm">{errorMessage}</p>
+              <p className="-mt-2 text-[#388e3c] text-sm">{errorMessage}</p>
             )}
 
             <button
