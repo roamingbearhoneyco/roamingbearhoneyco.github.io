@@ -24,18 +24,19 @@ serve(async (req) => {
         email,
         listIds: [BREVO_LIST_ID],
         attributes: { TIER: tier, FIRSTNAME: first_name },
-        updateEnabled: true,
+        updateEnabled: true, // Crucial: Allows updating existing contacts without error
       })
     });
 
-    // 3. Response Logic (201 Created vs 204/200 Updated)
+    // 3. Response Logic (201 Created vs 200/204 Updated)
     if (res.status === 201) {
       const data = await res.json();
       return new Response(JSON.stringify({ brevo_contact_id: data.id }), { status: 201 });
     } 
     
     if (res.ok) {
-      // Return null id for 204 No Content / 200 Update
+      // If contact already existed, Brevo returns 204 or 200. 
+      // We return null so the DB trigger knows not to overwrite anything.
       return new Response(JSON.stringify({ brevo_contact_id: null }), { status: 200 });
     }
 
