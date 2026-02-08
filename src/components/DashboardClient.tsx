@@ -8,7 +8,7 @@ interface Profile {
   id: number; 
   user_id: string;
   email: string;
-  first_name: string | null;
+  first_name: string;
   created_at: string;
   merch_preferences: string[] | null;
 }
@@ -48,9 +48,12 @@ export default function DashboardClient() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('subscription')
+  
+  // Profile Edit States
   const [editingProfile, setEditingProfile] = useState(false)
   const [editName, setEditName] = useState('')
   const [editMerch, setEditMerch] = useState<string[]>([])
+  
   const [saveLoading, setSaveLoading] = useState(false)
   const [message, setMessage] = useState<{ type: string; text: string } | null>(null)
 
@@ -64,7 +67,7 @@ export default function DashboardClient() {
           return
         }
 
-        // 1. Fetch profile FIRST to get the numeric ID
+        // 1. Fetch profile
         const { data: profileData, error: profileError } = await supabase
           .from('rbhc-table-profiles')
           .select('*')
@@ -81,35 +84,21 @@ export default function DashboardClient() {
         setEditName(profileData.first_name || '')
         setEditMerch(profileData.merch_preferences || [])
 
-        // 2. Fetch subscription and orders using the numeric profileData.id
+        // 2. Fetch sub and orders
         const [subResponse, orderResponse] = await Promise.all([
           supabase
             .from('subscriptions')
-            .select(`
-              *,
-              subscription_tiers:tier_id (
-                name,
-                display_name
-              )
-            `)
-            .eq('profile_id', profileData.id) // Corrected column
+            .select(`*, subscription_tiers:tier_id (name, display_name)`)
+            .eq('profile_id', profileData.id)
             .maybeSingle(),
-
           supabase
             .from('orders')
-            .select(`
-              *,
-              order_items (
-                *,
-                products (*)
-              )
-            `)
-            .eq('profile_id', profileData.id) // Corrected column
+            .select(`*, order_items (*, products (*))`)
+            .eq('profile_id', profileData.id)
             .order('created_at', { ascending: false })
         ])
 
         if (subResponse.data) {
-          // Handle the nested join data correctly
           const tier = Array.isArray(subResponse.data.subscription_tiers) 
             ? subResponse.data.subscription_tiers[0] 
             : subResponse.data.subscription_tiers;
@@ -134,6 +123,14 @@ export default function DashboardClient() {
     loadUserData()
   }, [])
 
+  // Sync edit states when profile loads or editing is toggled
+  useEffect(() => {
+    if (profile) {
+      setEditName(profile.first_name);
+      setEditMerch(profile.merch_preferences || []);
+    }
+  }, [editingProfile, profile]);
+
   const handleSaveProfile = async () => {
     if (!profile) return
     setSaveLoading(true)
@@ -143,14 +140,14 @@ export default function DashboardClient() {
       const { error } = await supabase
         .from('rbhc-table-profiles')
         .update({
-          first_name: editName || null,
-          merch_preferences: editMerch.length > 0 ? editMerch : null
+          first_name: editName.trim() || 'Friend',
+          merch_preferences: editMerch 
         })
         .eq('id', profile.id)
 
       if (error) throw error
 
-      setProfile({ ...profile, first_name: editName, merch_preferences: editMerch })
+      setProfile({ ...profile, first_name: editName.trim() || 'Friend', merch_preferences: editMerch })
       setEditingProfile(false)
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
       setTimeout(() => setMessage(null), 3000)
@@ -163,11 +160,7 @@ export default function DashboardClient() {
   }
 
   const handleUpgrade = async (tierId: number, billingCycle: number) => {
-    try {
-      setMessage({ type: 'success', text: 'Stripe checkout coming soon!' })
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Upgrade failed' })
-    }
+    setMessage({ type: 'success', text: 'Stripe checkout coming soon!' })
   }
 
   const handleSignOut = async () => {
@@ -183,7 +176,6 @@ export default function DashboardClient() {
     )
   }
 
-  // Adjusted logic: If they have a profile but no sub yet, they should still see the dashboard
   if (!profile) {
     return (
       <div className="card text-center py-12">
@@ -204,7 +196,7 @@ export default function DashboardClient() {
     <div className="space-y-6">
       <div className="card">
         <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
-          Welcome back, {profile.first_name || 'Friend'}!
+          Welcome back, {profile.first_name}!
         </h1>
         <p className="text-[var(--color-text-secondary)]">
           Member since {new Date(profile.created_at).toLocaleDateString()}
@@ -213,9 +205,7 @@ export default function DashboardClient() {
 
       {message && (
         <div className={`p-4 rounded-lg ${
-          message.type === 'success' 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
+          message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}>
           {message.text}
         </div>
@@ -267,8 +257,37 @@ export default function DashboardClient() {
                 </div>
                 <div>
                   <label className="form-label">First Name</label>
-                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="form-input" />
+                  <input 
+                    type="text" 
+                    value={editName} 
+                    onChange={e => setEditName(e.target.value)} 
+                    className="form-input" 
+                  />
                 </div>
+                
+                <div>
+                  <label className="form-label mb-2 block">Merch Preferences</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['T-Shirts', 'Hoodies', 'Hats', 'Stickers'].map((item) => (
+                      <label key={item} className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={editMerch.includes(item)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setEditMerch([...editMerch, item])
+                            } else {
+                              setEditMerch(editMerch.filter(i => i !== item))
+                            }
+                          }}
+                          className="rounded border-gray-300 text-[var(--color-secondary)] focus:ring-[var(--color-secondary)]"
+                        />
+                        <span className="text-sm font-medium">{item}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex gap-3">
                   <button onClick={() => setEditingProfile(false)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
                   <button onClick={handleSaveProfile} disabled={saveLoading} className="flex-1 btn btn-primary">
@@ -281,15 +300,31 @@ export default function DashboardClient() {
                 <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Profile Information</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-xs uppercase">Email</p>
+                    <p className="text-xs uppercase text-[var(--color-text-secondary)]">Email</p>
                     <p className="font-semibold">{profile.email}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase">First Name</p>
-                    <p className="font-semibold">{profile.first_name || 'Not set'}</p>
+                    <p className="text-xs uppercase text-[var(--color-text-secondary)]">First Name</p>
+                    <p className="font-semibold">{profile.first_name}</p>
                   </div>
                 </div>
-                <button onClick={() => setEditingProfile(true)} className="btn btn-secondary">Edit Profile</button>
+
+                <div className="mt-2 pt-4 border-t border-gray-100">
+                  <p className="text-xs uppercase text-[var(--color-text-secondary)] mb-2">Merch Preferences</p>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.merch_preferences && profile.merch_preferences.length > 0 ? (
+                      profile.merch_preferences.map(item => (
+                        <span key={item} className="px-3 py-1 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] text-xs font-bold rounded-full border border-[var(--color-secondary)]/20">
+                          {item}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-sm italic text-gray-400">No preferences set</p>
+                    )}
+                  </div>
+                </div>
+
+                <button onClick={() => setEditingProfile(true)} className="btn btn-secondary mt-4">Edit Profile</button>
               </div>
             )}
           </div>
@@ -299,7 +334,9 @@ export default function DashboardClient() {
 
         {activeTab === 'settings' && (
           <div className="card">
-            <button onClick={handleSignOut} className="w-full px-4 py-2 bg-red-600 text-white rounded-lg">Sign Out</button>
+            <button onClick={handleSignOut} className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+              Sign Out
+            </button>
           </div>
         )}
       </div>
