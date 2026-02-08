@@ -137,17 +137,22 @@ export default function DashboardClient() {
     setMessage(null)
 
     try {
+      // We send the data exactly as the user typed it.
+      // The DB trigger 'on_profile_update_sync_brevo' will:
+      // 1. Check if the name actually changed (preventing loops)
+      // 2. Sync the new name to Brevo automatically
       const { error } = await supabase
         .from('rbhc-table-profiles')
         .update({
-          first_name: editName.trim() || 'Friend',
+          first_name: editName, 
           merch_preferences: editMerch 
         })
         .eq('id', profile.id)
 
       if (error) throw error
 
-      setProfile({ ...profile, first_name: editName.trim() || 'Friend', merch_preferences: editMerch })
+      // Update local state to reflect what the user sees
+      setProfile({ ...profile, first_name: editName, merch_preferences: editMerch })
       setEditingProfile(false)
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
       setTimeout(() => setMessage(null), 3000)

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict aarEftuA46tYTCeQnkPgxkTDBK6jRj1JirrrA5IleHTC9FgOQ8K3yvKCNddPvAb
+\restrict DPQxe7GGb9Xht39onNhNOwlWbvdYoTHZPzmuAYvhufm6bZZa7sCAiLgEQbaOBtc
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -768,25 +768,30 @@ CREATE FUNCTION public.handle_new_auth_user() RETURNS trigger
     SET search_path TO 'public'
     AS $$
 BEGIN
-  -- Check if a profile with this email already exists (Lead-to-Customer flow)
   IF EXISTS (SELECT 1 FROM public."rbhc-table-profiles" WHERE email = NEW.email) THEN
     UPDATE public."rbhc-table-profiles"
     SET 
       user_id = NEW.id,
-      -- Fill in name from metadata if it was missing in the lead row
-      first_name = COALESCE(first_name, NEW.raw_user_meta_data->>'first_name')
+      -- Extract first word from full_name if first_name is missing
+      first_name = COALESCE(
+        first_name, 
+        NEW.raw_user_meta_data->>'first_name',
+        split_part(NEW.raw_user_meta_data->>'full_name', ' ', 1),
+        split_part(NEW.raw_user_meta_data->>'name', ' ', 1)
+      )
     WHERE email = NEW.email;
-    
-  -- Create new profile if they didn't exist (Direct Signup flow)
   ELSE
     INSERT INTO public."rbhc-table-profiles" (user_id, email, first_name)
     VALUES (
       NEW.id,
       NEW.email,
-      NEW.raw_user_meta_data->>'first_name'
+      COALESCE(
+        NEW.raw_user_meta_data->>'first_name',
+        split_part(NEW.raw_user_meta_data->>'full_name', ' ', 1),
+        split_part(NEW.raw_user_meta_data->>'name', ' ', 1)
+      )
     );
   END IF;
-
   RETURN NEW;
 END;
 $$;
@@ -806,6 +811,50 @@ BEGIN
     WHERE email = NEW.email AND user_id IS NOT NULL
   ) THEN
     RAISE EXCEPTION 'ALREADY_REGISTERED';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: sync_profile_to_brevo(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.sync_profile_to_brevo() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'extensions'
+    AS $$
+BEGIN
+  -- LOOP PREVENTION: Only trigger if the name actually changed
+  IF (OLD.first_name IS DISTINCT FROM NEW.first_name) THEN
+    -- We reuse your existing logic but fetch the current tier first
+    DECLARE
+      v_tier_name TEXT;
+      v_service_key TEXT;
+    BEGIN
+      SELECT t.name INTO v_tier_name
+      FROM public.subscriptions s
+      JOIN public.subscription_tiers t ON s.tier_id = t.id
+      WHERE s.profile_id = NEW.id
+      LIMIT 1;
+
+      SELECT decrypted_secret INTO v_service_key 
+      FROM vault.decrypted_secrets WHERE name = 'service_role_key';
+
+      PERFORM extensions.http_post(
+        'https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo-contact',
+        json_build_object(
+          'email', NEW.email,
+          'tier', COALESCE(v_tier_name, 'free'),
+          'first_name', NEW.first_name
+        )::jsonb,
+        headers := jsonb_build_object(
+          'Authorization', 'Bearer ' || v_service_key,
+          'Content-Type', 'application/json'
+        )
+      );
+    END;
   END IF;
   RETURN NEW;
 END;
@@ -3291,7 +3340,8 @@ CREATE TABLE public."rbhc-table-profiles" (
     subscribed boolean DEFAULT true,
     last_synced timestamp with time zone,
     first_name character varying(50),
-    id bigint NOT NULL
+    id bigint NOT NULL,
+    merch_preferences text[] DEFAULT '{}'::text[]
 );
 
 ALTER TABLE ONLY public."rbhc-table-profiles" REPLICA IDENTITY FULL;
@@ -4583,6 +4633,13 @@ CREATE TRIGGER on_profile_insert_gatekeeper BEFORE INSERT ON public."rbhc-table-
 
 
 --
+-- Name: rbhc-table-profiles on_profile_update_sync_brevo; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER on_profile_update_sync_brevo AFTER UPDATE ON public."rbhc-table-profiles" FOR EACH ROW EXECUTE FUNCTION public.sync_profile_to_brevo();
+
+
+--
 -- Name: subscriptions on_subscription_created_sync; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -4965,6 +5022,13 @@ CREATE POLICY "Everyone can view subscription tiers" ON public.subscription_tier
 
 
 --
+-- Name: rbhc-table-profiles Users can update their own profile; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can update their own profile" ON public."rbhc-table-profiles" FOR UPDATE TO authenticated USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id));
+
+
+--
 -- Name: order_items Users can view order items for their orders; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -5146,5 +5210,5 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict aarEftuA46tYTCeQnkPgxkTDBK6jRj1JirrrA5IleHTC9FgOQ8K3yvKCNddPvAb
+\unrestrict DPQxe7GGb9Xht39onNhNOwlWbvdYoTHZPzmuAYvhufm6bZZa7sCAiLgEQbaOBtc
 
