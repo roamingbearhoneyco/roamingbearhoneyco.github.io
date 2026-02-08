@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict yEpVcX8rICsc7qbcJgPpmFo8ZIdrpJk62eoJpWgxMoflqw1zkBbmwJNRHliPZzC
+\restrict nNs5ulRm7zND7VC3M4oRxTAD5iSyES5aKe2GISJoVvDHwuSEkXffxagzNvK1cUO
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -760,19 +760,34 @@ $$;
 
 
 --
--- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
+-- Name: handle_new_auth_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.handle_new_user() RETURNS trigger
+CREATE FUNCTION public.handle_new_auth_user() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
     AS $$
 BEGIN
-  INSERT INTO public."rbhc-table-profiles" (user_id, email)
-  VALUES (new.id, new.email)
-  ON CONFLICT (email) DO UPDATE
-  SET user_id = excluded.user_id
-  WHERE public."rbhc-table-profiles".user_id IS NULL;
-  RETURN new;
+  -- Check if a profile with this email already exists (Lead-to-Customer flow)
+  IF EXISTS (SELECT 1 FROM public."rbhc-table-profiles" WHERE email = NEW.email) THEN
+    UPDATE public."rbhc-table-profiles"
+    SET 
+      user_id = NEW.id,
+      -- Fill in name from metadata if it was missing in the lead row
+      first_name = COALESCE(first_name, NEW.raw_user_meta_data->>'first_name')
+    WHERE email = NEW.email;
+    
+  -- Create new profile if they didn't exist (Direct Signup flow)
+  ELSE
+    INSERT INTO public."rbhc-table-profiles" (user_id, email, first_name)
+    VALUES (
+      NEW.id,
+      NEW.email,
+      NEW.raw_user_meta_data->>'first_name'
+    );
+  END IF;
+
+  RETURN NEW;
 END;
 $$;
 
@@ -4547,6 +4562,13 @@ CREATE UNIQUE INDEX vector_indexes_name_bucket_id_idx ON storage.vector_indexes 
 
 
 --
+-- Name: users on_auth_user_created; Type: TRIGGER; Schema: auth; Owner: -
+--
+
+CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_auth_user();
+
+
+--
 -- Name: rbhc-table-profiles on_profile_created_assign_sub; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -5124,5 +5146,5 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict yEpVcX8rICsc7qbcJgPpmFo8ZIdrpJk62eoJpWgxMoflqw1zkBbmwJNRHliPZzC
+\unrestrict nNs5ulRm7zND7VC3M4oRxTAD5iSyES5aKe2GISJoVvDHwuSEkXffxagzNvK1cUO
 

@@ -5,7 +5,7 @@ import SubscriptionManager from './SubscriptionManager'
 import OrderHistory from './OrderHistory'
 
 interface Profile {
-  id: string;
+  id: number; // Changed to number per schema
   user_id: string;
   email: string;
   first_name: string | null;
@@ -15,7 +15,7 @@ interface Profile {
 
 interface Subscription {
   id: number;
-  user_id: string;
+  profile_id: number; // Corrected from user_id
   tier_id: number;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
@@ -31,6 +31,7 @@ interface Subscription {
 
 interface Order {
   id: number;
+  profile_id: number; // Corrected from user_id
   status: string;
   tracking_number: string | null;
   created_at: string;
@@ -63,78 +64,66 @@ export default function DashboardClient() {
           return
         }
 
-        // Fetch profile
+        // 1. Fetch profile FIRST to get the numeric ID
         const { data: profileData, error: profileError } = await supabase
           .from('rbhc-table-profiles')
           .select('*')
           .eq('user_id', user.id)
           .single()
 
-        if (profileData) {
-          setProfile(profileData)
-          setEditName(profileData.first_name || '')
-          setEditMerch(profileData.merch_preferences || [])
+        if (profileError || !profileData) {
+          console.error('Profile not found:', profileError)
+          setLoading(false)
+          return
         }
 
-        // Fetch subscription
-        const { data: subData, error: subError } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .single()
+        setProfile(profileData)
+        setEditName(profileData.first_name || '')
+        setEditMerch(profileData.merch_preferences || [])
 
-        if (subData) {
-          // Fetch tier separately to avoid RLS join issues
-          const { data: tierData } = await supabase
-            .from('subscription_tiers')
-            .select('*')
-            .eq('id', subData.tier_id)
-            .single()
+        // 2. Fetch subscription and orders using the numeric profileData.id
+        const [subResponse, orderResponse] = await Promise.all([
+          supabase
+            .from('subscriptions')
+            .select(`
+              *,
+              subscription_tiers:tier_id (
+                name,
+                display_name
+              )
+            `)
+            .eq('profile_id', profileData.id) // Corrected column
+            .maybeSingle(),
 
-          const formattedSub = {
-            ...subData,
-            subscription_tiers: tierData
-          } as Subscription
-          setSubscription(formattedSub)
+          supabase
+            .from('orders')
+            .select(`
+              *,
+              order_items (
+                *,
+                products (*)
+              )
+            `)
+            .eq('profile_id', profileData.id) // Corrected column
+            .order('created_at', { ascending: false })
+        ])
+
+        if (subResponse.data) {
+          // Handle the nested join data correctly
+          const tier = Array.isArray(subResponse.data.subscription_tiers) 
+            ? subResponse.data.subscription_tiers[0] 
+            : subResponse.data.subscription_tiers;
+
+          setSubscription({
+            ...subResponse.data,
+            subscription_tiers: tier
+          } as Subscription)
         }
 
-
-        // Fetch orders with items
-        const { data: orderData, error: orderError } = await supabase
-          .from('orders')
-          .select(`
-            id,
-            status,
-            tracking_number,
-            created_at,
-            shipped_at,
-            delivered_at,
-            order_items (
-              id,
-              quantity,
-              price_paid,
-              product_id
-            )
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        // Fetch products separately
-        const { data: productsData } = await supabase
-          .from('products')
-          .select('*')
-
-        // Map product data to order items
-        if (orderData && productsData) {
-          const enrichedOrders = orderData.map(order => ({
-            ...order,
-            order_items: order.order_items.map(item => ({
-              ...item,
-              products: productsData.find(p => p.id === item.product_id)
-            }))
-          }))
-          setOrders(enrichedOrders)
+        if (orderResponse.data) {
+          setOrders(orderResponse.data)
         }
+
       } catch (err) {
         console.error('Error loading user data:', err)
       } finally {
@@ -175,8 +164,6 @@ export default function DashboardClient() {
 
   const handleUpgrade = async (tierId: number, billingCycle: number) => {
     try {
-      // TODO: Redirect to Stripe checkout
-      console.log('Upgrade to tier:', tierId, 'cycle:', billingCycle)
       setMessage({ type: 'success', text: 'Stripe checkout coming soon!' })
     } catch (err) {
       setMessage({ type: 'error', text: 'Upgrade failed' })
@@ -196,10 +183,11 @@ export default function DashboardClient() {
     )
   }
 
-  if (!profile || !subscription) {
+  // Adjusted logic: If they have a profile but no sub yet, they should still see the dashboard
+  if (!profile) {
     return (
       <div className="card text-center py-12">
-        <p className="text-red-600">Error loading dashboard data</p>
+        <p className="text-red-600">Error loading profile data. Please try logging in again.</p>
       </div>
     )
   }
@@ -214,7 +202,6 @@ export default function DashboardClient() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
       <div className="card">
         <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
           Welcome back, {profile.first_name || 'Friend'}!
@@ -224,7 +211,6 @@ export default function DashboardClient() {
         </p>
       </div>
 
-      {/* Message Toast */}
       {message && (
         <div className={`p-4 rounded-lg ${
           message.type === 'success' 
@@ -235,7 +221,6 @@ export default function DashboardClient() {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
         {tabList.map(tab => (
           <button
@@ -252,89 +237,41 @@ export default function DashboardClient() {
         ))}
       </div>
 
-      {/* Tab Content */}
       <div>
-        {/* Subscription Tab */}
-        {activeTab === 'subscription' && subscription && (
-          <SubscriptionManager subscription={subscription} />
+        {activeTab === 'subscription' && (
+          subscription ? (
+            <SubscriptionManager subscription={subscription} />
+          ) : (
+            <div className="card text-center py-8">
+               <p className="mb-4">No active subscription found.</p>
+               <button onClick={() => setActiveTab('upgrade')} className="btn btn-primary">Choose a Plan</button>
+            </div>
+          )
         )}
 
-        {/* Upgrade Tab */}
         {activeTab === 'upgrade' && (
           <TierSelector 
-            currentTierName={subscription.subscription_tiers.name}
+            currentTierName={subscription?.subscription_tiers?.name || 'None'}
             onUpgrade={handleUpgrade}
           />
         )}
 
-        {/* Profile Tab */}
         {activeTab === 'profile' && (
           <div className="card space-y-4">
             {editingProfile ? (
               <div className="space-y-4">
                 <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Edit Profile</h3>
-                
                 <div>
                   <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    value={profile.email}
-                    disabled
-                    className="form-input opacity-50 cursor-not-allowed"
-                  />
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">Email cannot be changed</p>
+                  <input type="email" value={profile.email} disabled className="form-input opacity-50 cursor-not-allowed" />
                 </div>
-
                 <div>
                   <label className="form-label">First Name</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    maxLength={50}
-                    className="form-input"
-                  />
+                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="form-input" />
                 </div>
-
-                <div>
-                  <label className="form-label">Merchandise Preferences</label>
-                  <div className="space-y-2">
-                    {['shirt', 'hat'].map(merch => (
-                      <label key={merch} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editMerch.includes(merch)}
-                          onChange={e => {
-                            if (e.target.checked) {
-                              setEditMerch([...editMerch, merch])
-                            } else {
-                              setEditMerch(editMerch.filter(m => m !== merch))
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <span className="capitalize">{merch}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => {
-                      setEditingProfile(false)
-                      setEditName(profile.first_name || '')
-                      setEditMerch(profile.merch_preferences || [])
-                    }}
-                    className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveProfile}
-                    disabled={saveLoading}
-                    className="flex-1 btn btn-primary disabled:opacity-50"
-                  >
+                  <button onClick={() => setEditingProfile(false)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
+                  <button onClick={handleSaveProfile} disabled={saveLoading} className="flex-1 btn btn-primary">
                     {saveLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
@@ -342,53 +279,27 @@ export default function DashboardClient() {
             ) : (
               <div className="space-y-4">
                 <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Profile Information</h3>
-                
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-[var(--color-text-secondary)] text-xs uppercase">Email</p>
+                    <p className="text-xs uppercase">Email</p>
                     <p className="font-semibold">{profile.email}</p>
                   </div>
                   <div>
-                    <p className="text-[var(--color-text-secondary)] text-xs uppercase">First Name</p>
+                    <p className="text-xs uppercase">First Name</p>
                     <p className="font-semibold">{profile.first_name || 'Not set'}</p>
                   </div>
-                  {profile.merch_preferences && profile.merch_preferences.length > 0 && (
-                    <div className="col-span-2">
-                      <p className="text-[var(--color-text-secondary)] text-xs uppercase">Merch Preferences</p>
-                      <p className="font-semibold capitalize">{profile.merch_preferences.join(', ')}</p>
-                    </div>
-                  )}
                 </div>
-                
-                <button
-                  onClick={() => setEditingProfile(true)}
-                  className="btn btn-secondary"
-                >
-                  Edit Profile
-                </button>
+                <button onClick={() => setEditingProfile(true)} className="btn btn-secondary">Edit Profile</button>
               </div>
             )}
           </div>
         )}
 
-        {/* Orders Tab */}
-        {activeTab === 'orders' && (
-          <OrderHistory orders={orders} />
-        )}
+        {activeTab === 'orders' && <OrderHistory orders={orders} />}
 
-        {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className="card space-y-4">
-            <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Account Settings</h3>
-            
-            <div className="border-t border-gray-200 pt-4">
-              <button
-                onClick={handleSignOut}
-                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Sign Out
-              </button>
-            </div>
+          <div className="card">
+            <button onClick={handleSignOut} className="w-full px-4 py-2 bg-red-600 text-white rounded-lg">Sign Out</button>
           </div>
         )}
       </div>
