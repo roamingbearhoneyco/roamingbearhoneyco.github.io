@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict a3QZcaHhzq4qoEM2AajW2j5XC9h4tdjC4mnfP5Yp4l9EwErLYFm9WK1u4q48jfg
+\restrict yEpVcX8rICsc7qbcJgPpmFo8ZIdrpJk62eoJpWgxMoflqw1zkBbmwJNRHliPZzC
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -740,107 +740,6 @@ CREATE FUNCTION pgbouncer.get_auth(p_usename text) RETURNS TABLE(username text, 
 
 
 --
--- Name: call_brevo_sync(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.call_brevo_sync() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public', 'extensions'
-    AS $$DECLARE
-  res extensions.http_response;
-  response_json jsonb;
-  brevo_id text;
-  v_service_key TEXT;
-BEGIN
-  -- GUARD CLAUSE: Only proceed if relevant data changed
-  IF (TG_OP = 'UPDATE') THEN
-    IF (OLD.subscription_tier IS NOT DISTINCT FROM NEW.subscription_tier AND
-        OLD.first_name IS NOT DISTINCT FROM NEW.first_name AND
-        OLD.email IS NOT DISTINCT FROM NEW.email) THEN
-      RETURN NEW; 
-    END IF;
-  END IF;  
-
-  -- Get service key for Edge Function authorization
-  SELECT decrypted_secret INTO v_service_key 
-  FROM vault.decrypted_secrets 
-  WHERE name = 'service_role_key';
-
-  IF v_service_key IS NULL THEN
-    RAISE LOG 'Vault secret service_role_key not found!';
-    RETURN NEW;
-  END IF;
-
-  -- Call the Edge Function
-  res := extensions.http(
-    (
-      'POST', 
-      'https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo-contact',
-      ARRAY[
-        extensions.http_header('Authorization', 'Bearer ' || v_service_key),
-        extensions.http_header('Content-Type', 'application/json')
-      ],
-      'application/json',
-      json_build_object(
-        'email', NEW.email,
-        'tier', COALESCE(NEW.subscription_tier, 'Free'),
-        'first_name', COALESCE(NEW.first_name, 'Friend')
-      )::text
-    )::extensions.http_request
-  );
-
-  -- PARSE RESPONSE
-  -- Since this is a BEFORE trigger, we don't 'UPDATE' the table.
-  -- We just modify the 'NEW' variable before it hits the disk.
-  BEGIN
-    response_json := res.content::jsonb;
-    brevo_id := response_json->>'brevo_contact_id';
-
-    IF brevo_id IS NOT NULL THEN
-      NEW.brevo_contact_id := brevo_id; -- This sets the value for the save
-      NEW.last_synced := NOW();         -- This sets the value for the save
-    END IF;
-  EXCEPTION WHEN OTHERS THEN
-    RAISE LOG 'Failed to parse Brevo response: %', res.content;
-  END;
-
-  RETURN NEW; -- Postgres now saves NEW with the brevo_id included!
-END;$$;
-
-
---
--- Name: create_subscription_for_email_lead(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.create_subscription_for_email_lead() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-DECLARE
-  free_tier_id BIGINT;
-BEGIN
-  -- Get the 'free' tier ID
-  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE name = 'free' LIMIT 1;
-  
-  IF free_tier_id IS NULL THEN
-    RAISE LOG 'Free tier not found in subscription_tiers table';
-    RETURN NEW;
-  END IF;
-  
-  -- Create subscription for email-only leads (user_id is NOT NULL but came from onboard)
-  -- This happens for both:
-  -- 1. New email-only leads (INSERT with user_id from onboard UUID)
-  -- 2. Existing leads getting authenticated (UPDATE with user_id from auth)
-  INSERT INTO public.subscriptions (user_id, tier_id, billing_cycle, status)
-  VALUES (NEW.user_id, free_tier_id, 1, 'active')
-  ON CONFLICT (user_id) DO NOTHING;
-  
-  RETURN NEW;
-END;
-$$;
-
-
---
 -- Name: create_subscription_for_new_profile(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -855,62 +754,6 @@ BEGIN
   INSERT INTO public.subscriptions (profile_id, tier_id, billing_cycle, status)
   VALUES (NEW.id, free_tier_id, 1, 'active');
   
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: create_subscription_for_new_user(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.create_subscription_for_new_user() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-DECLARE
-  free_tier_id BIGINT;
-BEGIN
-  -- Get the 'free' tier ID
-  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE name = 'free' LIMIT 1;
-  
-  IF free_tier_id IS NULL THEN
-    RAISE LOG 'Free tier not found in subscription_tiers table';
-    RETURN NEW;
-  END IF;
-  
-  -- Create subscription for this user only if they don't already have one
-  INSERT INTO public.subscriptions (user_id, tier_id, billing_cycle, status)
-  VALUES (NEW.user_id, free_tier_id, 1, 'active')
-  ON CONFLICT (user_id) DO NOTHING;
-  
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: get_brevo_payload(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.get_brevo_payload() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  payload JSONB;
-BEGIN
-  SELECT jsonb_build_object(
-    'email', p.email,
-    'first_name', p.first_name,
-    'tier', st.name,
-    'profile_id', p.id
-  ) INTO payload
-  FROM public."rbhc-table-profiles" p
-  JOIN public.subscription_tiers st ON st.id = NEW.tier_id
-  WHERE p.id = NEW.profile_id;
-
-  -- Trigger the Edge Function via Supabase Webhook (configured in Dashboard)
-  -- Or manually using net.http_post if you have the extension enabled
   RETURN NEW;
 END;
 $$;
@@ -955,45 +798,22 @@ $$;
 
 
 --
--- Name: handle_profile_insert_logic(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.handle_profile_insert_logic() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  -- If the email exists and already has a user_id, it means they are a registered Auth user.
-  -- We prevent the frontend from overwriting this record.
-  IF EXISTS (
-    SELECT 1 FROM public."rbhc-table-profiles" 
-    WHERE email = NEW.email AND user_id IS NOT NULL
-  ) THEN
-    RAISE EXCEPTION 'ALREADY_REGISTERED';
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
-
-
---
 -- Name: sync_subscription_to_brevo(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION public.sync_subscription_to_brevo() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public', 'extensions'
-    AS $$
-DECLARE
+    AS $$DECLARE
   res extensions.http_response;
   response_json jsonb;
-  brevo_id text;
+  v_brevo_id text;
   v_service_key TEXT;
   v_email TEXT;
   v_first_name TEXT;
   v_tier_name TEXT;
 BEGIN
-  -- We need to fetch the Profile details because they aren't in the NEW subscription record
+  -- 1. Gather Profile and Tier details
   SELECT email, first_name INTO v_email, v_first_name
   FROM public."rbhc-table-profiles"
   WHERE id = NEW.profile_id;
@@ -1002,7 +822,7 @@ BEGIN
   FROM public.subscription_tiers
   WHERE id = NEW.tier_id;
 
-  -- 1. Vault Secret Check (Your original logic)
+  -- 2. Vault Secret Check
   SELECT decrypted_secret INTO v_service_key 
   FROM vault.decrypted_secrets 
   WHERE name = 'service_role_key';
@@ -1012,11 +832,11 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- 2. Call Edge Function (Your original syntax)
+  -- 3. Call Edge Function (Ensuring correct URL)
   res := extensions.http(
     (
       'POST', 
-      'https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo',
+      'https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo-contact',
       ARRAY[
         extensions.http_header('Authorization', 'Bearer ' || v_service_key),
         extensions.http_header('Content-Type', 'application/json')
@@ -1024,26 +844,28 @@ BEGIN
       'application/json',
       json_build_object(
         'email', v_email,
-        'tier', COALESCE(v_tier_name, 'OOPS'),
-        'first_name', COALESCE(v_first_name, 'Friend')
+        'tier', COALESCE(v_tier_name, 'oops'),
+        'first_name', COALESCE(v_first_name, 'oops')
       )::text
     )::extensions.http_request
   );
 
-  -- 3. Parse and Update (Only if ID is returned, prevents loops)
-  response_json := res.content::jsonb;
-  brevo_id := response_json->>'brevo_contact_id';
+  -- 4. Parse response and update the CORRECT column
+  -- Only update on 201 (New Contact Created)
+  IF res.status = 201 THEN
+    response_json := res.content::jsonb;
+    v_brevo_id := response_json->>'brevo_contact_id';
 
-  IF brevo_id IS NOT NULL THEN
-    UPDATE public."rbhc-table-profiles"
-    SET brevo_id = brevo_id, -- Matches your schema's column name
-        last_synced = NOW()
-    WHERE id = NEW.profile_id;
+    IF v_brevo_id IS NOT NULL THEN
+      UPDATE public."rbhc-table-profiles"
+      SET brevo_contact_id = v_brevo_id,  -- Correct column name
+          last_synced = NOW()
+      WHERE id = NEW.profile_id;
+    END IF;
   END IF;
 
   RETURN NEW;
-END;
-$$;
+END;$$;
 
 
 --
@@ -4725,20 +4547,6 @@ CREATE UNIQUE INDEX vector_indexes_name_bucket_id_idx ON storage.vector_indexes 
 
 
 --
--- Name: users on_auth_user_created; Type: TRIGGER; Schema: auth; Owner: -
---
-
-CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
-
---
--- Name: rbhc-table-profiles on_profile_create_or_update_subscription; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER on_profile_create_or_update_subscription AFTER INSERT OR UPDATE ON public."rbhc-table-profiles" FOR EACH ROW WHEN ((new.user_id IS NOT NULL)) EXECUTE FUNCTION public.create_subscription_for_email_lead();
-
-
---
 -- Name: rbhc-table-profiles on_profile_created_assign_sub; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -4753,24 +4561,10 @@ CREATE TRIGGER on_profile_insert_gatekeeper BEFORE INSERT ON public."rbhc-table-
 
 
 --
--- Name: rbhc-table-profiles on_profile_upsert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER on_profile_upsert BEFORE INSERT OR UPDATE ON public."rbhc-table-profiles" FOR EACH ROW EXECUTE FUNCTION public.call_brevo_sync();
-
-
---
 -- Name: subscriptions on_subscription_created_sync; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER on_subscription_created_sync AFTER INSERT OR UPDATE OF tier_id ON public.subscriptions FOR EACH ROW EXECUTE FUNCTION public.sync_subscription_to_brevo();
-
-
---
--- Name: subscriptions on_subscription_created_sync_brevo; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER on_subscription_created_sync_brevo AFTER INSERT OR UPDATE OF tier_id ON public.subscriptions FOR EACH ROW EXECUTE FUNCTION public.get_brevo_payload();
 
 
 --
@@ -5330,5 +5124,5 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict a3QZcaHhzq4qoEM2AajW2j5XC9h4tdjC4mnfP5Yp4l9EwErLYFm9WK1u4q48jfg
+\unrestrict yEpVcX8rICsc7qbcJgPpmFo8ZIdrpJk62eoJpWgxMoflqw1zkBbmwJNRHliPZzC
 
