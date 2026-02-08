@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict DEgNS2A2OUQLMhUCJrFDgbROwAPyCP4cRMS3EpbtURWLDp0HZ1jxdMiEpa0gJ9a
+\restrict nJt4aBS109178jBy2uQdkNZyfpTPPFgVg0oE8UEsEC0sOBK2QDCkBp3ix9GgHr6
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -310,8 +310,6 @@ COPY auth.flow_state (id, user_id, auth_code, code_challenge_method, code_challe
 --
 
 COPY auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) FROM stdin;
-00000000-0000-0000-0000-000000000000	12e94139-e89d-4d54-85ac-0b98bb646af2	authenticated	authenticated	justinmcintyre3@gmail.com	$2a$10$nrZXwzoXoq0bHVDr3xlMGu202WeGVzlLqL.27e9ADOi4fIzfkfPeW	2026-02-06 23:39:58.820733+00	\N		\N		\N			\N	2026-02-07 19:39:58.350513+00	{"provider": "google", "providers": ["google"]}	{"iss": "https://accounts.google.com", "sub": "102089393456770420162", "name": "justin mcintyre", "email": "justinmcintyre3@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "full_name": "justin mcintyre", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "provider_id": "102089393456770420162", "email_verified": true, "phone_verified": false}	\N	2026-02-06 23:39:57.741459+00	2026-02-07 19:39:58.352965+00	\N	\N			\N		0	\N		\N	f	\N	f
-00000000-0000-0000-0000-000000000000	3bc026ba-4f43-4784-8a85-dd9cfb977f92	authenticated	authenticated	bricewhitley@gmail.com	$2a$10$KM7MnjnmbsYe88ZPH5nOCeM6pA4AYKx8XAQ6mU/EmkkAklKb4Z.F.	\N	\N	38f11e280cab832bdccb8f7876c2e35e67c9d5c6d53abea96da362ef	2026-02-07 19:53:18.65555+00		\N			\N	\N	{"provider": "email", "providers": ["email"]}	{"sub": "3bc026ba-4f43-4784-8a85-dd9cfb977f92", "email": "bricewhitley@gmail.com", "email_verified": false, "phone_verified": false}	\N	2026-02-07 19:53:17.728573+00	2026-02-07 19:53:19.265124+00	\N	\N			\N		0	\N		\N	f	\N	f
 \.
 
 
@@ -320,8 +318,6 @@ COPY auth.users (instance_id, id, aud, role, email, encrypted_password, email_co
 --
 
 COPY auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at, id) FROM stdin;
-102089393456770420162	12e94139-e89d-4d54-85ac-0b98bb646af2	{"iss": "https://accounts.google.com", "sub": "102089393456770420162", "name": "justin mcintyre", "email": "justinmcintyre3@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "full_name": "justin mcintyre", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "provider_id": "102089393456770420162", "email_verified": true, "phone_verified": false}	google	2026-02-06 23:39:58.807889+00	2026-02-06 23:39:58.807961+00	2026-02-07 19:39:58.348192+00	13120ff5-0f6f-42cf-9a6c-eb86f9c4f211
-3bc026ba-4f43-4784-8a85-dd9cfb977f92	3bc026ba-4f43-4784-8a85-dd9cfb977f92	{"sub": "3bc026ba-4f43-4784-8a85-dd9cfb977f92", "email": "bricewhitley@gmail.com", "email_verified": false, "phone_verified": false}	email	2026-02-07 19:53:18.644158+00	2026-02-07 19:53:18.644208+00	2026-02-07 19:53:18.644208+00	1dbf16e7-2ab2-4abd-a9e8-9c17bfdc1c8f
 \.
 
 
@@ -346,7 +342,6 @@ COPY auth.oauth_clients (id, client_secret_hash, registration_type, redirect_uri
 --
 
 COPY auth.sessions (id, user_id, created_at, updated_at, factor_id, aal, not_after, refreshed_at, user_agent, ip, tag, oauth_client_id, refresh_token_hmac_key, refresh_token_counter, scopes) FROM stdin;
-f2536b58-ea40-406b-bf31-2b419f1154a4	12e94139-e89d-4d54-85ac-0b98bb646af2	2026-02-07 19:39:58.350591+00	2026-02-07 19:39:58.350591+00	\N	aal1	\N	\N	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36	130.45.156.4	\N	\N	\N	\N	\N
 \.
 
 
@@ -355,7 +350,6 @@ f2536b58-ea40-406b-bf31-2b419f1154a4	12e94139-e89d-4d54-85ac-0b98bb646af2	2026-0
 --
 
 COPY auth.mfa_amr_claims (session_id, created_at, updated_at, authentication_method, id) FROM stdin;
-f2536b58-ea40-406b-bf31-2b419f1154a4	2026-02-07 19:39:58.353349+00	2026-02-07 19:39:58.353349+00	oauth	4e9e8394-a77d-48c4-bbdf-c4ebdd15b7c1
 \.
 
 
@@ -404,7 +398,6 @@ COPY auth.oauth_consents (id, user_id, client_id, scopes, granted_at, revoked_at
 --
 
 COPY auth.one_time_tokens (id, user_id, token_type, token_hash, relates_to, created_at, updated_at) FROM stdin;
-ee86b8a1-9c6a-4bd3-ad9c-6ba9749b2ee5	3bc026ba-4f43-4784-8a85-dd9cfb977f92	confirmation_token	38f11e280cab832bdccb8f7876c2e35e67c9d5c6d53abea96da362ef	bricewhitley@gmail.com	2026-02-07 19:53:19.274245	2026-02-07 19:53:19.274245
 \.
 
 
@@ -413,7 +406,6 @@ ee86b8a1-9c6a-4bd3-ad9c-6ba9749b2ee5	3bc026ba-4f43-4784-8a85-dd9cfb977f92	confir
 --
 
 COPY auth.refresh_tokens (instance_id, id, token, user_id, revoked, created_at, updated_at, parent, session_id) FROM stdin;
-00000000-0000-0000-0000-000000000000	140	orgqhbxhyvva	12e94139-e89d-4d54-85ac-0b98bb646af2	f	2026-02-07 19:39:58.351467+00	2026-02-07 19:39:58.351467+00	\N	f2536b58-ea40-406b-bf31-2b419f1154a4
 \.
 
 
@@ -535,9 +527,51 @@ COPY auth.sso_domains (id, sso_provider_id, domain, created_at, updated_at) FROM
 -- Data for Name: rbhc-table-profiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."rbhc-table-profiles" (user_id, subscription_tier, created_at, id, email, brevo_contact_id, subscribed, last_synced, first_name) FROM stdin;
-12e94139-e89d-4d54-85ac-0b98bb646af2	conditional	2026-02-06 23:38:35.933237	124	justinmcintyre3@gmail.com	35	t	2026-02-06 23:38:35.933237+00	Justin
-3bc026ba-4f43-4784-8a85-dd9cfb977f92	conditional	2026-02-07 19:53:17.728244	126	bricewhitley@gmail.com	37	t	2026-02-07 19:53:17.728244+00	\N
+COPY public."rbhc-table-profiles" (user_id, created_at, email, brevo_contact_id, subscribed, last_synced, first_name, id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.orders (id, status, tracking_number, created_at, shipped_at, delivered_at, updated_at, profile_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.products (id, name, type, description, price, dropship_sku, dropship_supplier, is_active, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: order_items; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.order_items (id, order_id, product_id, quantity, price_paid, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: subscription_tiers; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.subscription_tiers (id, name, display_name, description, price_monthly, price_6month, price_yearly, benefits, created_at, updated_at) FROM stdin;
+1	free	Free	Access to content and community	0	0	0	{"merchandise": [], "discount_percent": 0, "honey_jars_per_year": 0}	2026-02-07 20:41:16.82886+00	2026-02-07 20:41:16.82886+00
+2	level-1	Level 1: Friend of the Bear	1 jar of honey per year + merch	1299	7794	12990	{"merchandise": ["shirt", "hat"], "discount_percent": 0, "honey_jars_per_year": 1}	2026-02-07 20:41:16.82886+00	2026-02-07 20:41:16.82886+00
+3	level-2	Level 2: Honey Keeper	1 jar + shirt/hat + 5% discount	1799	10794	17990	{"merchandise": ["shirt", "hat"], "discount_percent": 5, "honey_jars_per_year": 1}	2026-02-07 20:41:16.82886+00	2026-02-07 20:41:16.82886+00
+4	level-3	Level 3: Bear Guardian	2 jars per year (spring/fall) + merch + 10% discount	2499	14994	24990	{"merchandise": ["shirt", "hat", "other"], "discount_percent": 10, "honey_jars_per_year": 2}	2026-02-07 20:41:16.82886+00	2026-02-07 20:41:16.82886+00
+\.
+
+
+--
+-- Data for Name: subscriptions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.subscriptions (id, tier_id, stripe_customer_id, stripe_subscription_id, billing_cycle, status, next_renewal_date, created_at, updated_at, profile_id) FROM stdin;
 \.
 
 
@@ -765,6 +799,13 @@ COPY supabase_migrations.schema_migrations (version, statements, name) FROM stdi
 20250812125257	{"-- Create the extensions schema if it doesn't exist\r\nCREATE SCHEMA IF NOT EXISTS extensions","-- Drop the http extension if it exists in public\r\nDROP EXTENSION IF EXISTS http","-- Recreate the http extension in the extensions schema\r\nCREATE EXTENSION IF NOT EXISTS http SCHEMA extensions"}	move_http_post_to_extensions_scheme_from_public
 20250812125432	{"CREATE OR REPLACE FUNCTION public.call_brevo_sync()\r\nRETURNS trigger AS\r\n$$\r\nDECLARE\r\n  res extensions.http_response;\r\n  response_json jsonb;\r\n  brevo_id text;\r\nBEGIN\r\n  -- Make sure to qualify http_post with extensions schema\r\n  res := extensions.http_post(\r\n    'https://dohcquvoxlpqcsdkywbd.functions.supabase.co/sync-brevo-contact',\r\n    json_build_object(\r\n      'email', NEW.email,\r\n      'tier', NEW.subscription_tier,\r\n      'first_name', NEW.first_name\r\n    )::text,\r\n    'application/json'\r\n  );\r\n\r\n  response_json := res.content::jsonb;\r\n\r\n  brevo_id := response_json->>'brevo_contact_id';\r\n\r\n  IF brevo_id IS NOT NULL THEN\r\n    UPDATE public.\\"rbhc-table-profiles\\"\r\n    SET brevo_contact_id = brevo_id,\r\n        last_synced = NOW()\r\n    WHERE id = NEW.id;\r\n  END IF;\r\n\r\n  RETURN NEW;\r\nEND;\r\n$$ LANGUAGE plpgsql SECURITY DEFINER\r\n  SET search_path = public, extensions"}	_update_call_brevo_sync_http_post_from_extensions_shcema
 20260206002252	{"-- 1. Ensure the vault extension is active\r\nCREATE EXTENSION IF NOT EXISTS \\"supabase_vault\\" WITH SCHEMA \\"vault\\"","-- 2. Add your secret to the vault\r\n-- Note: Locally, you might use a dummy value, then update it in production\r\nSELECT vault.create_secret(\r\n  'PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY', \r\n  'service_role_key', \r\n  'Internal key for triggering Edge Functions'\r\n)"}	setup_vault_secrets
+20260207203938	{"-- Migration: Create subscription system tables\r\n-- Date: 2025-02-07\r\n-- Purpose: Single source of truth for all user tiers (free, level-1, level-2, level-3)\r\n--          with Stripe integration and flexible billing cycles\r\n\r\n-- ============================================================================\r\n-- TABLE: subscription_tiers\r\n-- Purpose: Define tier details (benefits, names, prices)\r\n-- ============================================================================\r\nCREATE TABLE public.subscription_tiers (\r\n  id BIGSERIAL PRIMARY KEY,\r\n  name VARCHAR(50) NOT NULL UNIQUE, -- 'free', 'level-1', 'level-2', 'level-3'\r\n  display_name VARCHAR(100) NOT NULL, -- 'Free', 'Level 1: Friend of the Bear', etc.\r\n  description TEXT,\r\n  \r\n  -- Pricing per billing cycle (in cents, e.g., 900 = $9.00)\r\n  price_monthly INT NOT NULL DEFAULT 0, -- $0 for free, actual price for paid tiers\r\n  price_6month INT NOT NULL DEFAULT 0,\r\n  price_yearly INT NOT NULL DEFAULT 0,\r\n  \r\n  -- Benefits (stored as JSON for flexibility)\r\n  benefits JSONB DEFAULT '{}', -- e.g., {\\"honey_jars_per_year\\": 1, \\"discount_percent\\": 5}\r\n  \r\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\r\n  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()\r\n)","-- Pre-populate tiers\r\nINSERT INTO public.subscription_tiers \r\n  (name, display_name, description, price_monthly, price_6month, price_yearly, benefits)\r\nVALUES\r\n  ('free', 'Free', 'Access to content and community', 0, 0, 0, '{\\"honey_jars_per_year\\": 0, \\"discount_percent\\": 0, \\"merchandise\\": []}'),\r\n  ('level-1', 'Level 1: Friend of the Bear', '1 jar of honey per year + merch', 1299, 7794, 12990, '{\\"honey_jars_per_year\\": 1, \\"discount_percent\\": 0, \\"merchandise\\": [\\"shirt\\", \\"hat\\"]}'),\r\n  ('level-2', 'Level 2: Honey Keeper', '1 jar + shirt/hat + 5% discount', 1799, 10794, 17990, '{\\"honey_jars_per_year\\": 1, \\"discount_percent\\": 5, \\"merchandise\\": [\\"shirt\\", \\"hat\\"]}'),\r\n  ('level-3', 'Level 3: Bear Guardian', '2 jars per year (spring/fall) + merch + 10% discount', 2499, 14994, 24990, '{\\"honey_jars_per_year\\": 2, \\"discount_percent\\": 10, \\"merchandise\\": [\\"shirt\\", \\"hat\\", \\"other\\"]}')","-- Index for lookups\r\nCREATE INDEX idx_subscription_tiers_name ON public.subscription_tiers(name)","-- ============================================================================\r\n-- TABLE: subscriptions\r\n-- Purpose: Track each user's subscription (single source of truth for tier)\r\n-- ============================================================================\r\nCREATE TABLE public.subscriptions (\r\n  id BIGSERIAL PRIMARY KEY,\r\n  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,\r\n  \r\n  -- Tier reference\r\n  tier_id BIGINT NOT NULL REFERENCES public.subscription_tiers(id),\r\n  \r\n  -- Stripe integration\r\n  stripe_customer_id VARCHAR(255), -- null until first payment\r\n  stripe_subscription_id VARCHAR(255), -- null until Stripe subscription created\r\n  \r\n  -- Billing cycle in months\r\n  billing_cycle INT NOT NULL DEFAULT 1, -- 1, 6, or 12\r\n  \r\n  -- Subscription status\r\n  status VARCHAR(50) NOT NULL DEFAULT 'active', -- active, paused, canceled\r\n  \r\n  -- Renewal tracking\r\n  next_renewal_date TIMESTAMP WITH TIME ZONE,\r\n  \r\n  -- Timestamps\r\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\r\n  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()\r\n)","-- Indexes for common queries\r\nCREATE INDEX idx_subscriptions_user_id ON public.subscriptions(user_id)","CREATE INDEX idx_subscriptions_tier_id ON public.subscriptions(tier_id)","CREATE INDEX idx_subscriptions_stripe_customer_id ON public.subscriptions(stripe_customer_id)","CREATE INDEX idx_subscriptions_stripe_subscription_id ON public.subscriptions(stripe_subscription_id)","CREATE INDEX idx_subscriptions_status ON public.subscriptions(status)","CREATE INDEX idx_subscriptions_next_renewal_date ON public.subscriptions(next_renewal_date)","-- ============================================================================\r\n-- TABLE: orders\r\n-- Purpose: Track physical honey shipments and merchandise orders\r\n-- ============================================================================\r\nCREATE TABLE public.orders (\r\n  id BIGSERIAL PRIMARY KEY,\r\n  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\r\n  \r\n  -- Order status\r\n  status VARCHAR(50) NOT NULL DEFAULT 'pending', -- pending, shipped, delivered, canceled\r\n  \r\n  -- Tracking\r\n  tracking_number VARCHAR(255),\r\n  \r\n  -- Timestamps\r\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\r\n  shipped_at TIMESTAMP WITH TIME ZONE,\r\n  delivered_at TIMESTAMP WITH TIME ZONE,\r\n  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()\r\n)","CREATE INDEX idx_orders_user_id ON public.orders(user_id)","CREATE INDEX idx_orders_status ON public.orders(status)","CREATE INDEX idx_orders_created_at ON public.orders(created_at)","-- ============================================================================\r\n-- TABLE: products\r\n-- Purpose: Honey jars, shirts, hats, merch items\r\n-- ============================================================================\r\nCREATE TABLE public.products (\r\n  id BIGSERIAL PRIMARY KEY,\r\n  name VARCHAR(255) NOT NULL,\r\n  type VARCHAR(50) NOT NULL, -- 'honey', 'shirt', 'hat', 'merch'\r\n  description TEXT,\r\n  price INT NOT NULL, -- in cents\r\n  \r\n  -- Dropship info (optional)\r\n  dropship_sku VARCHAR(255),\r\n  dropship_supplier VARCHAR(255),\r\n  \r\n  -- Availability\r\n  is_active BOOLEAN DEFAULT TRUE,\r\n  \r\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\r\n  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()\r\n)","CREATE INDEX idx_products_type ON public.products(type)","CREATE INDEX idx_products_is_active ON public.products(is_active)","-- ============================================================================\r\n-- TABLE: order_items\r\n-- Purpose: Line items in each order\r\n-- ============================================================================\r\nCREATE TABLE public.order_items (\r\n  id BIGSERIAL PRIMARY KEY,\r\n  order_id BIGINT NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,\r\n  product_id BIGINT NOT NULL REFERENCES public.products(id),\r\n  \r\n  quantity INT NOT NULL DEFAULT 1,\r\n  price_paid INT NOT NULL, -- in cents, for historical record\r\n  \r\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()\r\n)","CREATE INDEX idx_order_items_order_id ON public.order_items(order_id)","CREATE INDEX idx_order_items_product_id ON public.order_items(product_id)","-- ============================================================================\r\n-- RLS POLICIES - Enable Row Level Security\r\n-- ============================================================================\r\n\r\n-- Enable RLS on all new tables\r\nALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY","ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY","ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY","-- Subscriptions: authenticated users can only see their own\r\nCREATE POLICY \\"Users can view their own subscription\\"\r\n  ON public.subscriptions\r\n  FOR SELECT\r\n  USING (auth.uid() = user_id)","CREATE POLICY \\"Users can update their own subscription\\"\r\n  ON public.subscriptions\r\n  FOR UPDATE\r\n  USING (auth.uid() = user_id)","-- Orders: authenticated users can only see their own\r\nCREATE POLICY \\"Users can view their own orders\\"\r\n  ON public.orders\r\n  FOR SELECT\r\n  USING (auth.uid() = user_id)","-- Order items: authenticated users can only see items in their orders\r\nCREATE POLICY \\"Users can view order items for their orders\\"\r\n  ON public.order_items\r\n  FOR SELECT\r\n  USING (order_id IN (SELECT id FROM public.orders WHERE user_id = auth.uid()))","-- Subscription tiers and products are public read-only\r\nALTER TABLE public.subscription_tiers ENABLE ROW LEVEL SECURITY","ALTER TABLE public.products ENABLE ROW LEVEL SECURITY","CREATE POLICY \\"Everyone can view subscription tiers\\"\r\n  ON public.subscription_tiers\r\n  FOR SELECT\r\n  USING (true)","CREATE POLICY \\"Everyone can view products\\"\r\n  ON public.products\r\n  FOR SELECT\r\n  USING (is_active = true)","-- ============================================================================\r\n-- FUNCTION: Auto-create subscription for new users\r\n-- ============================================================================\r\n-- When a new profile is created, auto-create a 'free' subscription\r\nCREATE OR REPLACE FUNCTION public.create_subscription_for_new_user()\r\nRETURNS trigger\r\nLANGUAGE plpgsql\r\nSECURITY DEFINER\r\nSET search_path = public\r\nAS $$\r\nDECLARE\r\n  free_tier_id BIGINT;\r\nBEGIN\r\n  -- Get the 'free' tier ID\r\n  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE name = 'free' LIMIT 1;\r\n  \r\n  IF free_tier_id IS NULL THEN\r\n    RAISE LOG 'Free tier not found in subscription_tiers table';\r\n    RETURN NEW;\r\n  END IF;\r\n  \r\n  -- Create subscription for this user only if they don't already have one\r\n  INSERT INTO public.subscriptions (user_id, tier_id, billing_cycle, status)\r\n  VALUES (NEW.user_id, free_tier_id, 1, 'active')\r\n  ON CONFLICT (user_id) DO NOTHING;\r\n  \r\n  RETURN NEW;\r\nEND;\r\n$$","-- Trigger: When profile is created (and user_id is not null), create free subscription\r\nCREATE TRIGGER on_profile_insert_create_subscription\r\n  AFTER INSERT ON public.\\"rbhc-table-profiles\\"\r\n  FOR EACH ROW\r\n  WHEN (NEW.user_id IS NOT NULL)\r\n  EXECUTE FUNCTION public.create_subscription_for_new_user()","-- ============================================================================\r\n-- ROLLBACK INSTRUCTIONS\r\n-- ============================================================================\r\n--\r\n-- To rollback this migration, run:\r\n--\r\n-- DROP TRIGGER IF EXISTS on_profile_insert_create_subscription ON public.\\"rbhc-table-profiles\\";\r\n-- DROP FUNCTION IF EXISTS public.create_subscription_for_new_user();\r\n-- DROP TABLE IF EXISTS public.order_items CASCADE;\r\n-- DROP TABLE IF EXISTS public.orders CASCADE;\r\n-- DROP TABLE IF EXISTS public.products CASCADE;\r\n-- DROP TABLE IF EXISTS public.subscriptions CASCADE;\r\n-- DROP TABLE IF EXISTS public.subscription_tiers CASCADE;\r\n--"}	create_subscription_system
+20260207204800	{"-- Migration: Update handle_new_user function to remove subscription_tier\r\n-- Date: 2025-02-07\r\n-- Purpose: Remove subscription_tier setting from handle_new_user since subscriptions\r\n--          are now managed in the subscriptions table with auto-creation via trigger\r\n\r\nCREATE OR REPLACE FUNCTION public.handle_new_user()\r\nRETURNS trigger\r\nLANGUAGE plpgsql\r\nSECURITY DEFINER\r\nSET search_path = public\r\nAS $$\r\nBEGIN\r\n  INSERT INTO public.\\"rbhc-table-profiles\\" (user_id, created_at, email)\r\n  VALUES (new.id, now(), new.email)\r\n  ON CONFLICT (email) DO UPDATE\r\n  SET \r\n    user_id = excluded.user_id\r\n  WHERE public.\\"rbhc-table-profiles\\".user_id IS NULL;\r\n\r\n  RETURN new;\r\nEND;\r\n$$","-- ============================================================================\r\n-- ROLLBACK INSTRUCTIONS\r\n-- ============================================================================\r\n--\r\n-- To rollback this migration, restore the previous function version:\r\n--\r\n-- CREATE OR REPLACE FUNCTION public.handle_new_user()\r\n-- RETURNS trigger\r\n-- LANGUAGE plpgsql\r\n-- SECURITY DEFINER\r\n-- SET search_path = public\r\n-- AS $$\r\n-- BEGIN\r\n--   insert into public.\\"rbhc-table-profiles\\" (user_id, subscription_tier, created_at, email)\r\n--   values (new.id, 'conditional', now(), new.email)\r\n--   on conflict (email) do update\r\n--   set \r\n--     user_id = excluded.user_id,\r\n--     subscription_tier = excluded.subscription_tier\r\n--   where public.\\"rbhc-table-profiles\\".user_id is null;\r\n--\r\n--   return new;\r\n-- end;\r\n-- $$;"}	update_handle_new_user_function
+20260207204900	{"-- Migration: Remove subscription_tier column from rbhc-table-profiles\r\n-- Date: 2025-02-07\r\n-- Purpose: subscription_tier is now managed in subscriptions table, not denormalized in profiles\r\n\r\nALTER TABLE public.\\"rbhc-table-profiles\\"\r\nDROP COLUMN IF EXISTS subscription_tier","-- ============================================================================\r\n-- ROLLBACK INSTRUCTIONS\r\n-- ============================================================================\r\n--\r\n-- To rollback this migration:\r\n--\r\n-- ALTER TABLE public.\\"rbhc-table-profiles\\"\r\n-- ADD COLUMN subscription_tier VARCHAR(50) DEFAULT 'free';"}	remove_subscription_tier_from_profiles
+20260207205000	{"-- Migration: Update handle_new_user to UPSERT by email\r\n-- Date: 2025-02-07\r\n-- Purpose: When auth user signs up, check if email already exists in profiles (from onboard).\r\n--          If yes, UPDATE the user_id. If no, INSERT new profile.\r\n--          This allows seamless migration from email-only leads to authenticated users.\r\n\r\nCREATE OR REPLACE FUNCTION public.handle_new_user()\r\nRETURNS trigger\r\nLANGUAGE plpgsql\r\nSECURITY DEFINER\r\nSET search_path = public\r\nAS $$\r\nBEGIN\r\n  INSERT INTO public.\\"rbhc-table-profiles\\" (user_id, created_at, email)\r\n  VALUES (new.id, now(), new.email)\r\n  ON CONFLICT (email) DO UPDATE\r\n  SET \r\n    user_id = excluded.user_id,\r\n    created_at = COALESCE(public.\\"rbhc-table-profiles\\".created_at, excluded.created_at)\r\n  WHERE public.\\"rbhc-table-profiles\\".user_id IS NULL;\r\n\r\n  RETURN new;\r\nEND;\r\n$$","-- ============================================================================\r\n-- ROLLBACK INSTRUCTIONS\r\n-- ============================================================================\r\n--\r\n-- To rollback this migration:\r\n--\r\n-- CREATE OR REPLACE FUNCTION public.handle_new_user()\r\n-- RETURNS trigger\r\n-- LANGUAGE plpgsql\r\n-- SECURITY DEFINER\r\n-- SET search_path = public\r\n-- AS $$\r\n-- BEGIN\r\n--   INSERT INTO public.\\"rbhc-table-profiles\\" (user_id, created_at, email)\r\n--   VALUES (new.id, now(), new.email)\r\n--   ON CONFLICT (email) DO UPDATE\r\n--   SET \r\n--     user_id = excluded.user_id\r\n--   WHERE public.\\"rbhc-table-profiles\\".user_id IS NULL;\r\n--\r\n--   RETURN new;\r\n-- END;\r\n-- $$;"}	update_handle_new_user_upsert
+20260207205100	{"-- Migration: Create trigger for email-only leads (onboard) to auto-create FREE subscriptions\r\n-- Date: 2025-02-07\r\n-- Purpose: When a profile is inserted with NULL user_id (from onboard), auto-create a FREE subscription.\r\n--          When profile is later UPDATEd with a real user_id (from auth signup), subscription already exists.\r\n\r\nCREATE OR REPLACE FUNCTION public.create_subscription_for_email_lead()\r\nRETURNS trigger\r\nLANGUAGE plpgsql\r\nSECURITY DEFINER\r\nSET search_path = public\r\nAS $$\r\nDECLARE\r\n  free_tier_id BIGINT;\r\nBEGIN\r\n  -- Get the 'free' tier ID\r\n  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE name = 'free' LIMIT 1;\r\n  \r\n  IF free_tier_id IS NULL THEN\r\n    RAISE LOG 'Free tier not found in subscription_tiers table';\r\n    RETURN NEW;\r\n  END IF;\r\n  \r\n  -- Create subscription for email-only leads (user_id is NOT NULL but came from onboard)\r\n  -- This happens for both:\r\n  -- 1. New email-only leads (INSERT with user_id from onboard UUID)\r\n  -- 2. Existing leads getting authenticated (UPDATE with user_id from auth)\r\n  INSERT INTO public.subscriptions (user_id, tier_id, billing_cycle, status)\r\n  VALUES (NEW.user_id, free_tier_id, 1, 'active')\r\n  ON CONFLICT (user_id) DO NOTHING;\r\n  \r\n  RETURN NEW;\r\nEND;\r\n$$","-- Drop old trigger if it exists\r\nDROP TRIGGER IF EXISTS on_profile_insert_create_subscription ON public.\\"rbhc-table-profiles\\"","-- Create new trigger for both INSERT and UPDATE\r\nCREATE TRIGGER on_profile_create_or_update_subscription\r\n  AFTER INSERT OR UPDATE ON public.\\"rbhc-table-profiles\\"\r\n  FOR EACH ROW\r\n  WHEN (NEW.user_id IS NOT NULL)\r\n  EXECUTE FUNCTION public.create_subscription_for_email_lead()","-- ============================================================================\r\n-- ROLLBACK INSTRUCTIONS\r\n-- ============================================================================\r\n--\r\n-- To rollback this migration:\r\n--\r\n-- DROP TRIGGER IF EXISTS on_profile_create_or_update_subscription ON public.\\"rbhc-table-profiles\\";\r\n-- DROP FUNCTION IF EXISTS public.create_subscription_for_email_lead();\r\n--\r\n-- CREATE TRIGGER on_profile_insert_create_subscription\r\n--   AFTER INSERT ON public.\\"rbhc-table-profiles\\"\r\n--   FOR EACH ROW\r\n--   WHEN (NEW.user_id IS NOT NULL)\r\n--   EXECUTE FUNCTION public.create_subscription_for_new_user();"}	create_trigger_email_lead_subscription
+20260208124933	{"-- 1. START TRANSACTION\r\nBEGIN","-- 2. UNLOCK TABLES (Drop Foreign Keys and Policies first)\r\n-- We do this first so Postgres allows us to drop/modify columns later\r\nALTER TABLE public.subscriptions DROP CONSTRAINT IF EXISTS subscriptions_user_id_fkey","ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_user_id_fkey","DROP POLICY IF EXISTS \\"Users can view their own subscription\\" ON public.subscriptions","DROP POLICY IF EXISTS \\"Users can update their own subscription\\" ON public.subscriptions","DROP POLICY IF EXISTS \\"Users can view their own orders\\" ON public.orders","DROP POLICY IF EXISTS \\"Users can view order items for their orders\\" ON public.order_items","-- 3. REFACTOR THE PROFILES TABLE\r\n-- Drop and recreate ID as BigInt Identity\r\nALTER TABLE public.\\"rbhc-table-profiles\\" DROP COLUMN IF EXISTS id","ALTER TABLE public.\\"rbhc-table-profiles\\" ADD COLUMN id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY","-- Fix user_id to be the optional Auth UUID link\r\nALTER TABLE public.\\"rbhc-table-profiles\\" ALTER COLUMN user_id DROP NOT NULL","ALTER TABLE public.\\"rbhc-table-profiles\\" ALTER COLUMN user_id DROP DEFAULT","-- 4. UPDATE CHILD TABLES (Subscriptions & Orders)\r\n-- Now that policies are gone, we can safely drop these columns\r\nALTER TABLE public.subscriptions DROP COLUMN IF EXISTS user_id","ALTER TABLE public.subscriptions DROP COLUMN IF EXISTS profile_id","-- Safety check\r\nALTER TABLE public.subscriptions ADD COLUMN profile_id BIGINT","ALTER TABLE public.orders DROP COLUMN IF EXISTS user_id","ALTER TABLE public.orders DROP COLUMN IF EXISTS profile_id","-- Safety check\r\nALTER TABLE public.orders ADD COLUMN profile_id BIGINT","-- 5. RE-ESTABLISH INTEGRITY & SECURITY\r\n\r\n-- A) Add Foreign Keys\r\nALTER TABLE public.subscriptions \r\n  ADD CONSTRAINT subscriptions_profile_id_fkey \r\n  FOREIGN KEY (profile_id) REFERENCES public.\\"rbhc-table-profiles\\"(id) ON DELETE CASCADE","ALTER TABLE public.orders \r\n  ADD CONSTRAINT orders_profile_id_fkey \r\n  FOREIGN KEY (profile_id) REFERENCES public.\\"rbhc-table-profiles\\"(id) ON DELETE CASCADE","-- B) Re-create Policies (Using the profile_id -> user_id hop)\r\nCREATE POLICY \\"Users can view their own subscription\\" ON public.subscriptions\r\n  FOR SELECT USING (\r\n    profile_id IN (SELECT id FROM public.\\"rbhc-table-profiles\\" WHERE user_id = auth.uid())\r\n  )","CREATE POLICY \\"Users can view their own orders\\" ON public.orders\r\n  FOR SELECT USING (\r\n    profile_id IN (SELECT id FROM public.\\"rbhc-table-profiles\\" WHERE user_id = auth.uid())\r\n  )","CREATE POLICY \\"Users can view order items for their orders\\" ON public.order_items\r\n  FOR SELECT USING (\r\n    order_id IN (\r\n      SELECT id FROM public.orders \r\n      WHERE profile_id IN (SELECT id FROM public.\\"rbhc-table-profiles\\" WHERE user_id = auth.uid())\r\n    )\r\n  )","-- 6. UPDATE TRIGGER FUNCTIONS\r\n\r\n-- Trigger for Auth -> Profiles (Linker)\r\nCREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS trigger\r\n    LANGUAGE plpgsql SECURITY DEFINER AS $$\r\nBEGIN\r\n  INSERT INTO public.\\"rbhc-table-profiles\\" (user_id, email)\r\n  VALUES (new.id, new.email)\r\n  ON CONFLICT (email) DO UPDATE\r\n  SET user_id = excluded.user_id\r\n  WHERE public.\\"rbhc-table-profiles\\".user_id IS NULL;\r\n  RETURN new;\r\nEND;\r\n$$","-- Trigger for Profiles -> Subscriptions (Auto-onboard)\r\nCREATE OR REPLACE FUNCTION public.create_subscription_for_new_profile() RETURNS trigger\r\n    LANGUAGE plpgsql SECURITY DEFINER AS $$\r\nDECLARE\r\n  free_tier_id BIGINT;\r\nBEGIN\r\n  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE LOWER(name) = 'free' LIMIT 1;\r\n  \r\n  INSERT INTO public.subscriptions (profile_id, tier_id, billing_cycle, status)\r\n  VALUES (NEW.id, free_tier_id, 1, 'active');\r\n  \r\n  RETURN NEW;\r\nEND;\r\n$$","-- Final Trigger Attachments\r\nDROP TRIGGER IF EXISTS on_profile_created_assign_sub ON public.\\"rbhc-table-profiles\\"","CREATE TRIGGER on_profile_created_assign_sub\r\n  AFTER INSERT ON public.\\"rbhc-table-profiles\\"\r\n  FOR EACH ROW EXECUTE FUNCTION public.create_subscription_for_new_profile()",COMMIT}	decouple_auth_and_profile
+20260208134004	{BEGIN,"-- 1. REFINED PROFILE INSERT TRIGGER (Handling Duplicates)\r\n-- This logic ensures that if an email exists, we don't overwrite it if they are already an Auth user.\r\nCREATE OR REPLACE FUNCTION public.handle_profile_insert_logic() \r\nRETURNS TRIGGER AS $$\r\nBEGIN\r\n  -- If the email exists and already has a user_id, it means they are a registered Auth user.\r\n  -- We prevent the frontend from overwriting this record.\r\n  IF EXISTS (\r\n    SELECT 1 FROM public.\\"rbhc-table-profiles\\" \r\n    WHERE email = NEW.email AND user_id IS NOT NULL\r\n  ) THEN\r\n    RAISE EXCEPTION 'ALREADY_REGISTERED';\r\n  END IF;\r\n\r\n  RETURN NEW;\r\nEND;\r\n$$ LANGUAGE plpgsql","DROP TRIGGER IF EXISTS on_profile_insert_gatekeeper ON public.\\"rbhc-table-profiles\\"","CREATE TRIGGER on_profile_insert_gatekeeper\r\n  BEFORE INSERT ON public.\\"rbhc-table-profiles\\"\r\n  FOR EACH ROW EXECUTE FUNCTION public.handle_profile_insert_logic()","-- 2. BREVO SYNC TRIGGER (The Webhook Payload)\r\n-- This function gathers the Name, Email, and Tier from the related tables\r\nCREATE OR REPLACE FUNCTION public.get_brevo_payload() \r\nRETURNS TRIGGER AS $$\r\nDECLARE\r\n  payload JSONB;\r\nBEGIN\r\n  SELECT jsonb_build_object(\r\n    'email', p.email,\r\n    'first_name', p.first_name,\r\n    'tier', st.name,\r\n    'profile_id', p.id\r\n  ) INTO payload\r\n  FROM public.\\"rbhc-table-profiles\\" p\r\n  JOIN public.subscription_tiers st ON st.id = NEW.tier_id\r\n  WHERE p.id = NEW.profile_id;\r\n\r\n  -- Trigger the Edge Function via Supabase Webhook (configured in Dashboard)\r\n  -- Or manually using net.http_post if you have the extension enabled\r\n  RETURN NEW;\r\nEND;\r\n$$ LANGUAGE plpgsql","DROP TRIGGER IF EXISTS on_subscription_created_sync_brevo ON public.subscriptions","CREATE TRIGGER on_subscription_created_sync_brevo\r\n  AFTER INSERT OR UPDATE OF tier_id ON public.subscriptions\r\n  FOR EACH ROW EXECUTE FUNCTION public.get_brevo_payload()",COMMIT}	sync_logic_update
 \.
 
 
@@ -789,14 +830,49 @@ abc46386-fb9a-48c1-9221-ab61f5a6f07c	service_role_key	Internal key for triggerin
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('auth.refresh_tokens_id_seq', 140, true);
+SELECT pg_catalog.setval('auth.refresh_tokens_id_seq', 144, true);
+
+
+--
+-- Name: order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.order_items_id_seq', 1, false);
+
+
+--
+-- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.orders_id_seq', 1, false);
+
+
+--
+-- Name: products_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.products_id_seq', 1, false);
 
 
 --
 -- Name: rbhc-table-profiles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."rbhc-table-profiles_id_seq"', 126, true);
+SELECT pg_catalog.setval('public."rbhc-table-profiles_id_seq"', 1, false);
+
+
+--
+-- Name: subscription_tiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.subscription_tiers_id_seq', 4, true);
+
+
+--
+-- Name: subscriptions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.subscriptions_id_seq', 1, true);
 
 
 --
@@ -810,5 +886,5 @@ SELECT pg_catalog.setval('realtime.subscription_id_seq', 1, false);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict DEgNS2A2OUQLMhUCJrFDgbROwAPyCP4cRMS3EpbtURWLDp0HZ1jxdMiEpa0gJ9a
+\unrestrict nJt4aBS109178jBy2uQdkNZyfpTPPFgVg0oE8UEsEC0sOBK2QDCkBp3ix9GgHr6
 

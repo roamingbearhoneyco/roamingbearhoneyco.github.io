@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict NqTiyhbOAf4sMbZyhNDZbxtL3890UDt80WMvoZT91uDviZO9qWIhGoxIyHczNVc
+\restrict gDshv8u2aWPVzzNf7xWFb7lFdgdi1AIHhKLdseOHTu1CH4dvPglXzfQkAJ6gw3S
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -841,6 +841,26 @@ $$;
 
 
 --
+-- Name: create_subscription_for_new_profile(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.create_subscription_for_new_profile() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+DECLARE
+  free_tier_id BIGINT;
+BEGIN
+  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE LOWER(name) = 'free' LIMIT 1;
+  
+  INSERT INTO public.subscriptions (profile_id, tier_id, billing_cycle, status)
+  VALUES (NEW.id, free_tier_id, 1, 'active');
+  
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: create_subscription_for_new_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -870,23 +890,68 @@ $$;
 
 
 --
+-- Name: get_brevo_payload(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.get_brevo_payload() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  payload JSONB;
+BEGIN
+  SELECT jsonb_build_object(
+    'email', p.email,
+    'first_name', p.first_name,
+    'tier', st.name,
+    'profile_id', p.id
+  ) INTO payload
+  FROM public."rbhc-table-profiles" p
+  JOIN public.subscription_tiers st ON st.id = NEW.tier_id
+  WHERE p.id = NEW.profile_id;
+
+  -- Trigger the Edge Function via Supabase Webhook (configured in Dashboard)
+  -- Or manually using net.http_post if you have the extension enabled
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION public.handle_new_user() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
     AS $$
 BEGIN
-  INSERT INTO public."rbhc-table-profiles" (user_id, created_at, email)
-  VALUES (new.id, now(), new.email)
+  INSERT INTO public."rbhc-table-profiles" (user_id, email)
+  VALUES (new.id, new.email)
   ON CONFLICT (email) DO UPDATE
-  SET 
-    user_id = excluded.user_id,
-    created_at = COALESCE(public."rbhc-table-profiles".created_at, excluded.created_at)
+  SET user_id = excluded.user_id
   WHERE public."rbhc-table-profiles".user_id IS NULL;
-
   RETURN new;
+END;
+$$;
+
+
+--
+-- Name: handle_profile_insert_logic(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.handle_profile_insert_logic() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  -- If the email exists and already has a user_id, it means they are a registered Auth user.
+  -- We prevent the frontend from overwriting this record.
+  IF EXISTS (
+    SELECT 1 FROM public."rbhc-table-profiles" 
+    WHERE email = NEW.email AND user_id IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'ALREADY_REGISTERED';
+  END IF;
+
+  RETURN NEW;
 END;
 $$;
 
@@ -3221,13 +3286,13 @@ ALTER SEQUENCE public.order_items_id_seq OWNED BY public.order_items.id;
 
 CREATE TABLE public.orders (
     id bigint NOT NULL,
-    user_id uuid NOT NULL,
     status character varying(50) DEFAULT 'pending'::character varying NOT NULL,
     tracking_number character varying(255),
     created_at timestamp with time zone DEFAULT now(),
     shipped_at timestamp with time zone,
     delivered_at timestamp with time zone,
-    updated_at timestamp with time zone DEFAULT now()
+    updated_at timestamp with time zone DEFAULT now(),
+    profile_id bigint
 );
 
 
@@ -3292,14 +3357,14 @@ ALTER SEQUENCE public.products_id_seq OWNED BY public.products.id;
 --
 
 CREATE TABLE public."rbhc-table-profiles" (
-    user_id uuid DEFAULT auth.uid(),
+    user_id uuid,
     created_at timestamp without time zone DEFAULT now() NOT NULL,
-    id bigint NOT NULL,
     email text,
     brevo_contact_id character varying,
     subscribed boolean DEFAULT true,
     last_synced timestamp with time zone,
-    first_name character varying(50)
+    first_name character varying(50),
+    id bigint NOT NULL
 );
 
 ALTER TABLE ONLY public."rbhc-table-profiles" REPLICA IDENTITY FULL;
@@ -3316,19 +3381,14 @@ COMMENT ON TABLE public."rbhc-table-profiles" IS 'table setup for user profiles'
 -- Name: rbhc-table-profiles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public."rbhc-table-profiles_id_seq"
+ALTER TABLE public."rbhc-table-profiles" ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."rbhc-table-profiles_id_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: rbhc-table-profiles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public."rbhc-table-profiles_id_seq" OWNED BY public."rbhc-table-profiles".id;
+    CACHE 1
+);
 
 
 --
@@ -3374,7 +3434,6 @@ ALTER SEQUENCE public.subscription_tiers_id_seq OWNED BY public.subscription_tie
 
 CREATE TABLE public.subscriptions (
     id bigint NOT NULL,
-    user_id uuid NOT NULL,
     tier_id bigint NOT NULL,
     stripe_customer_id character varying(255),
     stripe_subscription_id character varying(255),
@@ -3382,7 +3441,8 @@ CREATE TABLE public.subscriptions (
     status character varying(50) DEFAULT 'active'::character varying NOT NULL,
     next_renewal_date timestamp with time zone,
     created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now()
+    updated_at timestamp with time zone DEFAULT now(),
+    profile_id bigint
 );
 
 
@@ -3654,13 +3714,6 @@ ALTER TABLE ONLY public.orders ALTER COLUMN id SET DEFAULT nextval('public.order
 --
 
 ALTER TABLE ONLY public.products ALTER COLUMN id SET DEFAULT nextval('public.products_id_seq'::regclass);
-
-
---
--- Name: rbhc-table-profiles id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public."rbhc-table-profiles" ALTER COLUMN id SET DEFAULT nextval('public."rbhc-table-profiles_id_seq"'::regclass);
 
 
 --
@@ -3963,14 +4016,6 @@ ALTER TABLE ONLY public.subscription_tiers
 
 ALTER TABLE ONLY public.subscriptions
     ADD CONSTRAINT subscriptions_pkey PRIMARY KEY (id);
-
-
---
--- Name: subscriptions subscriptions_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.subscriptions
-    ADD CONSTRAINT subscriptions_user_id_key UNIQUE (user_id);
 
 
 --
@@ -4450,13 +4495,6 @@ CREATE INDEX idx_orders_status ON public.orders USING btree (status);
 
 
 --
--- Name: idx_orders_user_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_orders_user_id ON public.orders USING btree (user_id);
-
-
---
 -- Name: idx_products_is_active; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4517,13 +4555,6 @@ CREATE INDEX idx_subscriptions_stripe_subscription_id ON public.subscriptions US
 --
 
 CREATE INDEX idx_subscriptions_tier_id ON public.subscriptions USING btree (tier_id);
-
-
---
--- Name: idx_subscriptions_user_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_subscriptions_user_id ON public.subscriptions USING btree (user_id);
 
 
 --
@@ -4618,10 +4649,31 @@ CREATE TRIGGER on_profile_create_or_update_subscription AFTER INSERT OR UPDATE O
 
 
 --
+-- Name: rbhc-table-profiles on_profile_created_assign_sub; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER on_profile_created_assign_sub AFTER INSERT ON public."rbhc-table-profiles" FOR EACH ROW EXECUTE FUNCTION public.create_subscription_for_new_profile();
+
+
+--
+-- Name: rbhc-table-profiles on_profile_insert_gatekeeper; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER on_profile_insert_gatekeeper BEFORE INSERT ON public."rbhc-table-profiles" FOR EACH ROW EXECUTE FUNCTION public.handle_profile_insert_logic();
+
+
+--
 -- Name: rbhc-table-profiles on_profile_upsert; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER on_profile_upsert BEFORE INSERT OR UPDATE ON public."rbhc-table-profiles" FOR EACH ROW EXECUTE FUNCTION public.call_brevo_sync();
+
+
+--
+-- Name: subscriptions on_subscription_created_sync_brevo; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER on_subscription_created_sync_brevo AFTER INSERT OR UPDATE OF tier_id ON public.subscriptions FOR EACH ROW EXECUTE FUNCTION public.get_brevo_payload();
 
 
 --
@@ -4804,11 +4856,11 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- Name: orders orders_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: orders orders_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+    ADD CONSTRAINT orders_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public."rbhc-table-profiles"(id) ON DELETE CASCADE;
 
 
 --
@@ -4820,19 +4872,19 @@ ALTER TABLE ONLY public."rbhc-table-profiles"
 
 
 --
+-- Name: subscriptions subscriptions_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.subscriptions
+    ADD CONSTRAINT subscriptions_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public."rbhc-table-profiles"(id) ON DELETE CASCADE;
+
+
+--
 -- Name: subscriptions subscriptions_tier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.subscriptions
     ADD CONSTRAINT subscriptions_tier_id_fkey FOREIGN KEY (tier_id) REFERENCES public.subscription_tiers(id);
-
-
---
--- Name: subscriptions subscriptions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.subscriptions
-    ADD CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
 
 --
@@ -5000,33 +5052,32 @@ CREATE POLICY "Everyone can view subscription tiers" ON public.subscription_tier
 
 
 --
--- Name: subscriptions Users can update their own subscription; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Users can update their own subscription" ON public.subscriptions FOR UPDATE USING ((auth.uid() = user_id));
-
-
---
 -- Name: order_items Users can view order items for their orders; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY "Users can view order items for their orders" ON public.order_items FOR SELECT USING ((order_id IN ( SELECT orders.id
    FROM public.orders
-  WHERE (orders.user_id = auth.uid()))));
+  WHERE (orders.profile_id IN ( SELECT "rbhc-table-profiles".id
+           FROM public."rbhc-table-profiles"
+          WHERE ("rbhc-table-profiles".user_id = auth.uid()))))));
 
 
 --
 -- Name: orders Users can view their own orders; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Users can view their own orders" ON public.orders FOR SELECT USING ((auth.uid() = user_id));
+CREATE POLICY "Users can view their own orders" ON public.orders FOR SELECT USING ((profile_id IN ( SELECT "rbhc-table-profiles".id
+   FROM public."rbhc-table-profiles"
+  WHERE ("rbhc-table-profiles".user_id = auth.uid()))));
 
 
 --
 -- Name: subscriptions Users can view their own subscription; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Users can view their own subscription" ON public.subscriptions FOR SELECT USING ((auth.uid() = user_id));
+CREATE POLICY "Users can view their own subscription" ON public.subscriptions FOR SELECT USING ((profile_id IN ( SELECT "rbhc-table-profiles".id
+   FROM public."rbhc-table-profiles"
+  WHERE ("rbhc-table-profiles".user_id = auth.uid()))));
 
 
 --
@@ -5182,5 +5233,5 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict NqTiyhbOAf4sMbZyhNDZbxtL3890UDt80WMvoZT91uDviZO9qWIhGoxIyHczNVc
+\unrestrict gDshv8u2aWPVzzNf7xWFb7lFdgdi1AIHhKLdseOHTu1CH4dvPglXzfQkAJ6gw3S
 
