@@ -5,7 +5,7 @@ import SubscriptionManager from './SubscriptionManager'
 import OrderHistory from './OrderHistory'
 
 interface Profile {
-  id: number; // Changed to number per schema
+  id: number; 
   user_id: string;
   email: string;
   first_name: string | null;
@@ -15,7 +15,7 @@ interface Profile {
 
 interface Subscription {
   id: number;
-  profile_id: number; // Corrected from user_id
+  profile_id: number; 
   tier_id: number;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
@@ -31,7 +31,7 @@ interface Subscription {
 
 interface Order {
   id: number;
-  profile_id: number; // Corrected from user_id
+  profile_id: number; 
   status: string;
   tracking_number: string | null;
   created_at: string;

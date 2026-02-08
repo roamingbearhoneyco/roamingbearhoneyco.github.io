@@ -12,6 +12,7 @@ interface OrderItem {
 
 interface Order {
   id: number;
+  profile_id: number; 
   status: string;
   tracking_number: string | null;
   created_at: string;

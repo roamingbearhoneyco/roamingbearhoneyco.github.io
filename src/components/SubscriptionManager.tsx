@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 interface SubscriptionData {
   id: number;
-  user_id: string;
+  profile_id: number;
   tier_id: number;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;

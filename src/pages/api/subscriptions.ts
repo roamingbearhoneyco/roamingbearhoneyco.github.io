@@ -14,11 +14,19 @@ export const GET: APIRoute = async ({ request }) => {
     if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
+    
+    const { data: profile } = await supabase
+    .from('rbhc-table-profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+    if (!profile) return new Response(JSON.stringify({ error: 'Profile not found' }), { status: 404 });
 
     const { data: subscription, error } = await supabase
       .from('subscriptions')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('profile_id', profile.id)
       .single();
 
     if (error) {
