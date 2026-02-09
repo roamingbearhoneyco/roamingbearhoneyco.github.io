@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict DPQxe7GGb9Xht39onNhNOwlWbvdYoTHZPzmuAYvhufm6bZZa7sCAiLgEQbaOBtc
+\restrict KsWe3oWwDlP1RaIRr82rr4noF5OJs0zi4uugwN7DoFzDiM1S4lRasvQSSGupfnf
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -745,15 +745,11 @@ CREATE FUNCTION pgbouncer.get_auth(p_usename text) RETURNS TABLE(username text, 
 
 CREATE FUNCTION public.create_subscription_for_new_profile() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'extensions'
     AS $$
-DECLARE
-  free_tier_id BIGINT;
 BEGIN
-  SELECT id INTO free_tier_id FROM public.subscription_tiers WHERE LOWER(name) = 'free' LIMIT 1;
-  
-  INSERT INTO public.subscriptions (profile_id, tier_id, billing_cycle, status)
-  VALUES (NEW.id, free_tier_id, 1, 'active');
-  
+  INSERT INTO public.subscriptions (profile_id, tier_id, status)
+  VALUES (NEW.id, 1, 'active');
   RETURN NEW;
 END;
 $$;
@@ -772,12 +768,12 @@ BEGIN
     UPDATE public."rbhc-table-profiles"
     SET 
       user_id = NEW.id,
-      -- Extract first word from full_name if first_name is missing
       first_name = COALESCE(
         first_name, 
         NEW.raw_user_meta_data->>'first_name',
         split_part(NEW.raw_user_meta_data->>'full_name', ' ', 1),
-        split_part(NEW.raw_user_meta_data->>'name', ' ', 1)
+        split_part(NEW.raw_user_meta_data->>'name', ' ', 1),
+        'Friend'
       )
     WHERE email = NEW.email;
   ELSE
@@ -788,7 +784,8 @@ BEGIN
       COALESCE(
         NEW.raw_user_meta_data->>'first_name',
         split_part(NEW.raw_user_meta_data->>'full_name', ' ', 1),
-        split_part(NEW.raw_user_meta_data->>'name', ' ', 1)
+        split_part(NEW.raw_user_meta_data->>'name', ' ', 1),
+        'Friend'
       )
     );
   END IF;
@@ -802,16 +799,30 @@ $$;
 --
 
 CREATE FUNCTION public.handle_profile_insert_gatekeeper() RETURNS trigger
-    LANGUAGE plpgsql
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
     AS $$
 BEGIN
-  -- If email exists and is already linked to an Auth User, block the insert
+  -- If user_id is null, it means it's a pre-sign-up entry (like an email capture)
+  -- We allow these to proceed.
+  IF NEW.user_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  -- If user_id is NOT null, it's an auth-linked profile. 
+  -- We check if a profile already exists for this email.
   IF EXISTS (
     SELECT 1 FROM public."rbhc-table-profiles" 
-    WHERE email = NEW.email AND user_id IS NOT NULL
+    WHERE email = NEW.email AND user_id IS NULL
   ) THEN
-    RAISE EXCEPTION 'ALREADY_REGISTERED';
+    -- If an orphan profile exists, we update it instead of inserting a new one
+    UPDATE public."rbhc-table-profiles"
+    SET user_id = NEW.user_id,
+        first_name = COALESCE(NEW.first_name, first_name)
+    WHERE email = NEW.email AND user_id IS NULL;
+    RETURN NULL; -- Cancel the insert because we handled it via update
   END IF;
+
   RETURN NEW;
 END;
 $$;
@@ -823,39 +834,70 @@ $$;
 
 CREATE FUNCTION public.sync_profile_to_brevo() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public', 'extensions'
+    SET search_path TO 'public', 'extensions', 'vault'
     AS $$
+DECLARE
+  res extensions.http_response;
+  response_json jsonb;
+  v_brevo_id text;
+  v_service_key TEXT;
+  v_email TEXT;
+  v_first_name TEXT;
+  v_tier_name TEXT;
 BEGIN
-  -- LOOP PREVENTION: Only trigger if the name actually changed
-  IF (OLD.first_name IS DISTINCT FROM NEW.first_name) THEN
-    -- We reuse your existing logic but fetch the current tier first
-    DECLARE
-      v_tier_name TEXT;
-      v_service_key TEXT;
-    BEGIN
-      SELECT t.name INTO v_tier_name
-      FROM public.subscriptions s
-      JOIN public.subscription_tiers t ON s.tier_id = t.id
-      WHERE s.profile_id = NEW.id
-      LIMIT 1;
+  -- 1. Gather Profile and Tier details
+  -- NOTE: Based on your code, this trigger likely runs on a 'subscriptions' table
+  -- since it uses NEW.profile_id and NEW.tier_id
+  SELECT email, first_name INTO v_email, v_first_name
+  FROM public."rbhc-table-profiles"
+  WHERE id = NEW.profile_id;
 
-      SELECT decrypted_secret INTO v_service_key 
-      FROM vault.decrypted_secrets WHERE name = 'service_role_key';
+  SELECT name INTO v_tier_name
+  FROM public.subscription_tiers
+  WHERE id = NEW.tier_id;
 
-      PERFORM extensions.http_post(
-        'https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo-contact',
-        json_build_object(
-          'email', NEW.email,
-          'tier', COALESCE(v_tier_name, 'free'),
-          'first_name', NEW.first_name
-        )::jsonb,
-        headers := jsonb_build_object(
-          'Authorization', 'Bearer ' || v_service_key,
-          'Content-Type', 'application/json'
-        )
-      );
-    END;
+  -- 2. Vault Secret Check
+  SELECT decrypted_secret INTO v_service_key 
+  FROM vault.decrypted_secrets 
+  WHERE name = 'service_role_key';
+
+  IF v_service_key IS NULL THEN
+    RAISE LOG 'Vault secret service_role_key not found!';
+    RETURN NEW;
   END IF;
+
+  -- 3. Call Edge Function (Ensuring correct URL)
+  res := extensions.http(
+    (
+      'POST', 
+      'https://roqwrtsmcisdxhgthpem.supabase.co/functions/v1/sync-brevo-contact',
+      ARRAY[
+        extensions.http_header('Authorization', 'Bearer ' || v_service_key),
+        extensions.http_header('Content-Type', 'application/json')
+      ],
+      'application/json',
+      json_build_object(
+        'email', v_email,
+        'tier', COALESCE(v_tier_name, 'oops'),
+        'first_name', COALESCE(v_first_name, 'oops')
+      )::text
+    )::extensions.http_request
+  );
+
+  -- 4. Parse response and update the CORRECT column
+  IF res.status = 201 THEN
+    response_json := res.content::jsonb;
+    v_brevo_id := response_json->>'brevo_contact_id';
+
+    IF v_brevo_id IS NOT NULL THEN
+      -- Use a direct update that won't re-trigger itself infinitely
+      UPDATE public."rbhc-table-profiles"
+      SET brevo_contact_id = v_brevo_id,
+          last_synced = NOW()
+      WHERE id = NEW.profile_id;
+    END IF;
+  END IF;
+
   RETURN NEW;
 END;
 $$;
@@ -5001,13 +5043,6 @@ CREATE POLICY "Allow insert for email-only subscribers" ON public."rbhc-table-pr
 
 
 --
--- Name: rbhc-table-profiles Enable users to view their own data only; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Enable users to view their own data only" ON public."rbhc-table-profiles" FOR SELECT TO authenticated USING ((( SELECT auth.uid() AS uid) = user_id));
-
-
---
 -- Name: products Everyone can view products; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -5025,36 +5060,43 @@ CREATE POLICY "Everyone can view subscription tiers" ON public.subscription_tier
 -- Name: rbhc-table-profiles Users can update their own profile; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Users can update their own profile" ON public."rbhc-table-profiles" FOR UPDATE TO authenticated USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id));
+CREATE POLICY "Users can update their own profile" ON public."rbhc-table-profiles" FOR UPDATE TO authenticated USING ((user_id = ( SELECT auth.uid() AS uid))) WITH CHECK ((user_id = ( SELECT auth.uid() AS uid)));
 
 
 --
 -- Name: order_items Users can view order items for their orders; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Users can view order items for their orders" ON public.order_items FOR SELECT USING ((order_id IN ( SELECT orders.id
+CREATE POLICY "Users can view order items for their orders" ON public.order_items FOR SELECT TO authenticated USING ((order_id IN ( SELECT orders.id
    FROM public.orders
   WHERE (orders.profile_id IN ( SELECT "rbhc-table-profiles".id
            FROM public."rbhc-table-profiles"
-          WHERE ("rbhc-table-profiles".user_id = auth.uid()))))));
+          WHERE ("rbhc-table-profiles".user_id = ( SELECT auth.uid() AS uid)))))));
+
+
+--
+-- Name: rbhc-table-profiles Users can view own profile; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can view own profile" ON public."rbhc-table-profiles" FOR SELECT TO authenticated USING ((user_id = ( SELECT auth.uid() AS uid)));
 
 
 --
 -- Name: orders Users can view their own orders; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Users can view their own orders" ON public.orders FOR SELECT USING ((profile_id IN ( SELECT "rbhc-table-profiles".id
+CREATE POLICY "Users can view their own orders" ON public.orders FOR SELECT TO authenticated USING ((profile_id IN ( SELECT "rbhc-table-profiles".id
    FROM public."rbhc-table-profiles"
-  WHERE ("rbhc-table-profiles".user_id = auth.uid()))));
+  WHERE ("rbhc-table-profiles".user_id = ( SELECT auth.uid() AS uid)))));
 
 
 --
 -- Name: subscriptions Users can view their own subscription; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Users can view their own subscription" ON public.subscriptions FOR SELECT USING ((profile_id IN ( SELECT "rbhc-table-profiles".id
+CREATE POLICY "Users can view their own subscription" ON public.subscriptions FOR SELECT TO authenticated USING ((profile_id IN ( SELECT "rbhc-table-profiles".id
    FROM public."rbhc-table-profiles"
-  WHERE ("rbhc-table-profiles".user_id = auth.uid()))));
+  WHERE ("rbhc-table-profiles".user_id = ( SELECT auth.uid() AS uid)))));
 
 
 --
@@ -5210,5 +5252,5 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict DPQxe7GGb9Xht39onNhNOwlWbvdYoTHZPzmuAYvhufm6bZZa7sCAiLgEQbaOBtc
+\unrestrict KsWe3oWwDlP1RaIRr82rr4noF5OJs0zi4uugwN7DoFzDiM1S4lRasvQSSGupfnf
 

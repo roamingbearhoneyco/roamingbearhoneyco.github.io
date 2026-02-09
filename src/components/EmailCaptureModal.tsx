@@ -38,9 +38,9 @@ export default function EmailCaptureModal() {
     if (profileError) {
       // Catch our custom Postgres Exception
       if (profileError.message.includes('ALREADY_REGISTERED')) {
-        setErrorMessage("It appears you already have an account. Please login or use the password recovery process.")
+        setErrorMessage("You're already in our system! Please log in to your dashboard or check your email for updates.")
       } else if (profileError.code === '23505') { // Standard Unique Violation
-        setErrorMessage("You're already on the list! Check your inbox for updates.")
+        setErrorMessage("You're already in our system! Please log in to your dashboard or check your email for updates.")
       } else {
         setErrorMessage(profileError.message)
       }
