@@ -62,8 +62,9 @@ export default function DashboardClient() {
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
       if (authError || !user) {
+        // Do NOT call setLoading(false)
         window.location.href = '/signin'
-        return
+        return new Promise(() => {}); // This "hangs" the function so finally{} never runs
       }
 
       // Fetch profile
@@ -78,7 +79,7 @@ export default function DashboardClient() {
         setLoading(false)
         return
       }
-
+      
       setProfile(profileData)
       setEditName(profileData.first_name || '')
       setEditMerch(profileData.merch_preferences || [])

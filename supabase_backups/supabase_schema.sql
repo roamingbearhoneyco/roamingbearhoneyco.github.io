@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict KsWe3oWwDlP1RaIRr82rr4noF5OJs0zi4uugwN7DoFzDiM1S4lRasvQSSGupfnf
+\restrict 9tfI7vgueh1LhMfbLrZSeDADdgRgSbMt8fkyB6HgwXlCPe2nTIImQ8qe9Bs0UAj
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -838,35 +838,37 @@ CREATE FUNCTION public.sync_profile_to_brevo() RETURNS trigger
     AS $$
 DECLARE
   res extensions.http_response;
-  response_json jsonb;
-  v_brevo_id text;
   v_service_key TEXT;
-  v_email TEXT;
-  v_first_name TEXT;
   v_tier_name TEXT;
 BEGIN
-  -- 1. Gather Profile and Tier details
-  -- NOTE: Based on your code, this trigger likely runs on a 'subscriptions' table
-  -- since it uses NEW.profile_id and NEW.tier_id
-  SELECT email, first_name INTO v_email, v_first_name
-  FROM public."rbhc-table-profiles"
-  WHERE id = NEW.profile_id;
+  -- LOOP & RECURSION PREVENTION
+  -- This check ensures we ONLY ping Brevo if the core identity data changed.
+  -- If only 'last_synced' or 'merch_preferences' changed, this returns immediately.
+  IF (OLD.first_name IS NOT DISTINCT FROM NEW.first_name) AND 
+     (OLD.email IS NOT DISTINCT FROM NEW.email) THEN
+    RETURN NEW;
+  END IF;
 
-  SELECT name INTO v_tier_name
-  FROM public.subscription_tiers
-  WHERE id = NEW.tier_id;
+  -- DATA MAPPING
+  -- Find the subscription tier using the profile's primary key (id)
+  SELECT t.name INTO v_tier_name
+  FROM public.subscriptions s
+  JOIN public.subscription_tiers t ON s.tier_id = t.id
+  WHERE s.profile_id = NEW.id
+  LIMIT 1;
 
-  -- 2. Vault Secret Check
+  -- AUTHORIZATION
   SELECT decrypted_secret INTO v_service_key 
   FROM vault.decrypted_secrets 
   WHERE name = 'service_role_key';
 
   IF v_service_key IS NULL THEN
-    RAISE LOG 'Vault secret service_role_key not found!';
+    RAISE LOG 'Brevo Sync Failed: service_role_key not found in Vault';
     RETURN NEW;
   END IF;
 
-  -- 3. Call Edge Function (Ensuring correct URL)
+  -- EXTERNAL SYNC
+  -- Using the working extensions.http pattern
   res := extensions.http(
     (
       'POST', 
@@ -877,26 +879,12 @@ BEGIN
       ],
       'application/json',
       json_build_object(
-        'email', v_email,
-        'tier', COALESCE(v_tier_name, 'oops'),
-        'first_name', COALESCE(v_first_name, 'oops')
+        'email', NEW.email,
+        'tier', COALESCE(v_tier_name, 'free'),
+        'first_name', COALESCE(NEW.first_name, 'Friend')
       )::text
     )::extensions.http_request
   );
-
-  -- 4. Parse response and update the CORRECT column
-  IF res.status = 201 THEN
-    response_json := res.content::jsonb;
-    v_brevo_id := response_json->>'brevo_contact_id';
-
-    IF v_brevo_id IS NOT NULL THEN
-      -- Use a direct update that won't re-trigger itself infinitely
-      UPDATE public."rbhc-table-profiles"
-      SET brevo_contact_id = v_brevo_id,
-          last_synced = NOW()
-      WHERE id = NEW.profile_id;
-    END IF;
-  END IF;
 
   RETURN NEW;
 END;
@@ -5036,10 +5024,10 @@ ALTER TABLE auth.sso_providers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE auth.users ENABLE ROW LEVEL SECURITY;
 
 --
--- Name: rbhc-table-profiles Allow insert for email-only subscribers; Type: POLICY; Schema: public; Owner: -
+-- Name: rbhc-table-profiles Allow onboarding submission; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Allow insert for email-only subscribers" ON public."rbhc-table-profiles" FOR INSERT TO anon WITH CHECK ((true AND (user_id IS NULL)));
+CREATE POLICY "Allow onboarding submission" ON public."rbhc-table-profiles" FOR INSERT TO authenticated, anon WITH CHECK ((email IS NOT NULL));
 
 
 --
@@ -5252,5 +5240,5 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict KsWe3oWwDlP1RaIRr82rr4noF5OJs0zi4uugwN7DoFzDiM1S4lRasvQSSGupfnf
+\unrestrict 9tfI7vgueh1LhMfbLrZSeDADdgRgSbMt8fkyB6HgwXlCPe2nTIImQ8qe9Bs0UAj
 
