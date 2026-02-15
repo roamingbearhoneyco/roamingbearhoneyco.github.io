@@ -67,7 +67,7 @@ export default function DashboardClient() {
         window.location.href = '/signin'
         // We return a "hanging" promise here so that 'loading' stays true.
         // This prevents the "Red Error" UI from ever rendering before the page changes.
-        return new Promise(() => {}); 
+        return; 
       }
 
       // --- PHASE 2: THE FETCHER (Only runs if logged in) ---

@@ -1,26 +1,32 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import AuthGate from '../components/AuthGate.tsx';
 import DashboardClient from '../components/DashboardClient.tsx';
 ---
 
+
 <Layout>
+
+  <!-- Background layers should be OUTSIDE Layout -->
   <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/comb.jpg');"></div>
   <div class="fixed inset-0 z-10 bg-gradient-to-b from-[var(--color-soft-amber)]/90 to-[var(--color-golden-honey)]/50"></div>
+  <AuthGate client:only="react">
 
-  <section class="relative z-20 pt-32 px-4 text-center fade-in-up">
-    <h1 class="hero-title !mb-2">
-      Member Portal
-    </h1>
-    <p class="hero-subtitle text-black !max-w-xl mx-auto !mb-0">
-      Welcome back to your Roaming Bear Honey Co. dashboard. 
-    </p>
-  </section>
+    <section class="relative z-20 pt-32 px-4 text-center fade-in-up">
+      <h1 class="hero-title !mb-2">Member Portal</h1>
+      <p class="hero-subtitle text-black !max-w-xl mx-auto !mb-0">
+        Welcome back to your Roaming Bear Honey Co. dashboard.
+      </p>
+    </section>
 
-  <section class="relative z-30 px-4 sm:px-6 section-spacing">
-    <div class="container-responsive">
-      <div class="max-w-2xl mx-auto">
-        <DashboardClient client:only="react" />
+    <section class="relative z-30 px-4 sm:px-6 section-spacing">
+      <div class="container-responsive">
+        <div class="max-w-2xl mx-auto">
+          <DashboardClient client:only="react" />
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+  </AuthGate>
+
 </Layout>

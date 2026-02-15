@@ -10,7 +10,9 @@ import '../styles/global.css';
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
-<header class="sticky top-0 bg-[var(--color-primary)] shadow-lg z-[var(--z-sticky)]">
+<body class="min-h-screen flex flex-col">
+
+<header class="shrink-0 sticky top-0 bg-[var(--color-primary)] shadow-lg z-[var(--z-sticky)]">
   <div class="container-responsive py-3 flex justify-between items-center">
     <a href="/" class="flex items-center space-x-3 group">
       <span class="text-2xl font-bold text-[var(--color-text-light)] group-hover:text-[var(--color-accent)] transition-colors duration-300">
@@ -61,11 +63,11 @@ import '../styles/global.css';
   </nav>
 </header>
 
-<main class="p-0">
+<main class="flex-1 p-0">
   <slot />
 </main>
 
-<footer class="relative z-[var(--z-sticky)] bg-[var(--color-background)] py-6 px-4 mt-12 border-t border-[var(--color-accent)]/20">
+<footer class="shrink-0 relative z-[var(--z-sticky)] bg-[var(--color-background)] py-6 px-4 mt-12 border-t border-[var(--color-accent)]/20">
   <div class="container-responsive text-center">
     <p class="text-sm text-[var(--color-text-secondary)]">
       Copyright &copy; <span id="copyright" class="text-[var(--color-secondary)]"></span> Roaming Bear Honey Co. | All rights reserved
@@ -75,6 +77,8 @@ import '../styles/global.css';
     </p>
   </div>
 </footer>
+
+</body>
 
 <!-- Evergreen Copyright Year Script -->
 <script is:inline>

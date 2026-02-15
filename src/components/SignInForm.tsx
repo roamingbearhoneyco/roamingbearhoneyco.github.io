@@ -60,6 +60,7 @@ export default function SignInForm() {
 
   return (
     <div className="space-y-6 bg-white p-6 rounded shadow-md border border-gray-200 max-w-md mx-auto">
+      
       {accountExists && (
         <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded border border-yellow-300">
           An account with {emailFromQuery ? `"${emailFromQuery}" ` : ''}already exists. Please sign in instead.
