@@ -59,32 +59,35 @@ export default function DashboardClient() {
   const loadUserData = async () => {
     setLoading(true)
     try {
+      // --- PHASE 1: THE BOUNCER (AUTH CHECK) ---
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
       if (authError || !user) {
-        // Do NOT call setLoading(false)
+        // Redirecting immediately.
         window.location.href = '/signin'
-        return new Promise(() => {}); // This "hangs" the function so finally{} never runs
+        // We return a "hanging" promise here so that 'loading' stays true.
+        // This prevents the "Red Error" UI from ever rendering before the page changes.
+        return new Promise(() => {}); 
       }
 
-      // Fetch profile
+      // --- PHASE 2: THE FETCHER (Only runs if logged in) ---
       const { data: profileData, error: profileError } = await supabase
         .from('rbhc-table-profiles')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle() // Using maybeSingle to avoid 406 errors
+        .maybeSingle()
 
       if (profileError || !profileData) {
         console.error('Profile Error:', profileError)
         setLoading(false)
         return
       }
-      
+
       setProfile(profileData)
       setEditName(profileData.first_name || '')
       setEditMerch(profileData.merch_preferences || [])
 
-      // Fetch related data
+      // Fetch related data in parallel
       const [subResponse, orderResponse] = await Promise.all([
         supabase
           .from('subscriptions')
@@ -115,7 +118,9 @@ export default function DashboardClient() {
 
     } catch (err) {
       console.error('Critical Dashboard Error:', err)
+      setLoading(false)
     } finally {
+      // This only runs if we didn't trigger the redirect return above
       setLoading(false)
     }
   }
@@ -158,6 +163,8 @@ export default function DashboardClient() {
     }
   }
 
+  // RENDER LOGIC
+  // 1. Show the spinner while checking auth OR while redirecting
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
@@ -167,6 +174,8 @@ export default function DashboardClient() {
     )
   }
 
+  // 2. Only show this if loading is FINISHED and profile is still null
+  // (This handles the case where the user is logged in but doesn't have a DB record)
   if (!profile) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center card">
