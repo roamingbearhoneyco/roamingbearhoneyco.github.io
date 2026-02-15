@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout>
+<Layout description="Local. Sustainable. Wild-crafted honey from the forest to your table. Shop small-batch honey and support sustainable beekeeping.">
   <!-- Fixed Background Image Layer -->
   <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/roaming-bear-bg.png');"></div>
 
@@ -54,20 +54,3 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </section>
 </Layout>
-
-<style>
-  @keyframes fadeInUp {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-fade-in-up {
-    animation: fadeInUp 1s ease-out forwards;
-  }
-</style>

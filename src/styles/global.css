@@ -485,6 +485,23 @@
       opacity: 0;
     }
   }
+
+  /* Card entrance: start small at top-left, grow out to the right and down */
+  @keyframes growInFromTopLeft {
+    0% {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .card-grow-in {
+    transform-origin: top left;
+    animation: growInFromTopLeft 0.45s ease-out forwards;
+  }
   
   /* Responsive Utilities */
   .container-responsive {

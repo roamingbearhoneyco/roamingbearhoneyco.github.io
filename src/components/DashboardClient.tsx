@@ -197,7 +197,7 @@ export default function DashboardClient() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <div className="card">
+      <div className="card card-grow-in">
         <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
           Welcome back, {profile.first_name}!
         </h1>

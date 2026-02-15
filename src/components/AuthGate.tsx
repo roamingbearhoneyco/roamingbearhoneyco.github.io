@@ -21,8 +21,19 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     check();
   }, []);
 
-  // While checking auth, render NOTHING (no flash)
-  if (!authChecked) return null;
+  // While checking auth, render same-height skeleton to avoid layout shift (best practice)
+  if (!authChecked) {
+    return (
+      <div className="relative z-20 pt-32 px-4 text-center section-spacing min-h-[24rem]">
+        <div className="max-w-2xl mx-auto animate-pulse space-y-4" role="status" aria-label="Loading">
+          <div className="h-10 bg-[var(--color-accent)]/20 rounded w-3/4 mx-auto" />
+          <div className="h-4 bg-[var(--color-accent)]/10 rounded w-full" />
+          <div className="h-4 bg-[var(--color-accent)]/10 rounded w-5/6 mx-auto" />
+          <div className="h-32 bg-[var(--color-accent)]/10 rounded mt-8" />
+        </div>
+      </div>
+    );
+  }
 
   // Auth confirmed → render dashboard
   return <>{children}</>;

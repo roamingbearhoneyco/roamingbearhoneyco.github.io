@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout>
+<Layout title="About" description="Roaming Bear Honey Co. is rooted in nature and community. Learn about our mission, sustainable beekeeping, and the wild behind the brand.">
   <!-- Fixed Background Image Layer -->
   <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/vintage-honeycomb-bg.jpg');"></div>
 
@@ -45,6 +45,8 @@ import Layout from '../layouts/Layout.astro';
           <img
             src="/assets/beekeeper.png"
             alt="Beekeeper tending to hives"
+            width="448"
+            height="336"
             class="max-w-md w-full h-auto rounded-2xl shadow-2xl border-4 border-[var(--color-accent)]/20"
           />
         </div>
@@ -57,6 +59,9 @@ import Layout from '../layouts/Layout.astro';
           <img
             src="/assets/adopt-us-bees.png"
             alt="Adopt us bees"
+            width="448"
+            height="336"
+            loading="lazy"
             class="max-w-md w-full h-auto rounded-2xl shadow-2xl border-4 border-[var(--color-accent)]/20"
           />
         </div>
@@ -88,19 +93,6 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
-  @keyframes fadeInUp {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-fade-in-up {
-    animation: fadeInUp 1s ease-out forwards;
-  }
   /* Responsive tweaks for better stacking and spacing */
   @media (max-width: 1024px) {
     .w-80, .h-96 {

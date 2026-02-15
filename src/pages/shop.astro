@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout>
+<Layout title="Shop" description="Shop wild-crafted honey and support sustainable beekeeping. Honey'ville U.S.A. — where wild honey meets community and story.">
   <!-- Fixed Background Image Layer -->
   <div class="fixed inset-0 z-0 bg-center bg-cover" style="background-image: url('/assets/rbhc-honey.png');"></div>
 
@@ -19,19 +19,3 @@ import Layout from '../layouts/Layout.astro';
     </p>
   </section>
 </Layout>
-
-<style>
-  @keyframes fadeInUp {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-fade-in-up {
-    animation: fadeInUp 1s ease-out forwards;
-  }
-</style>
