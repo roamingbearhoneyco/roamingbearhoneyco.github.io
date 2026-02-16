@@ -168,7 +168,7 @@ export default function RegisterForm() {
                 queryParams: {
                   // request refresh token from Google
                   access_type: 'offline',
-                  prompt: 'consent',
+                  prompt: 'select_account',
                 },
               },
             });

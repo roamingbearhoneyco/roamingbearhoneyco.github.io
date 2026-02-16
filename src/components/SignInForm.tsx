@@ -120,7 +120,7 @@ export default function SignInForm() {
                 redirectTo: `${window.location.origin}/portal`,
                 queryParams: {
                   access_type: 'offline',
-                  prompt: 'consent',
+                  prompt: 'select_account',
                 },
               },
             })
