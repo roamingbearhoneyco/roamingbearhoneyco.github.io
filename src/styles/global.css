@@ -498,10 +498,51 @@
     }
   }
 
+  /* Card entrance with subtle rotation: "circling in" effect */
+  @keyframes circleIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.3) rotate(-5deg);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(0.85) rotate(1deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+    /* Card entrance: pulse/bounce in from the back */
+    @keyframes pulseBounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.4);
+      }
+      60% {
+        opacity: 0.9;
+        transform: scale(1.08);
+      }
+      80% {
+        transform: scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
   .card-grow-in {
+   transform-origin: center;
+   animation: pulseBounceIn 0.65s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  } 
+
+
+  /*.card-grow-in {
     transform-origin: top left;
     animation: growInFromTopLeft 0.45s ease-out forwards;
-  }
+  } */
   
   /* Responsive Utilities */
   .container-responsive {
