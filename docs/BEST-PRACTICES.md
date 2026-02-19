@@ -1,61 +1,53 @@
-# Roaming Bear Honey Co. — Best Practices & Why the Home Page Loads Smoothly
+# Roaming Bear Honey Co. — Best Practices
 
-## Why the home page (index.astro) loads smoothly
-
-- **Fully static** — No `client:only` or client-side data fetching; the entire page is server-rendered HTML and CSS.
-- **Critical CSS in layout** — `Layout.astro` imports `global.css`, so styles are in the same request and there’s no FOUC.
-- **Fixed backgrounds** — Hero and overlays use `position: fixed` and `inset: 0`, so they don’t affect layout or cause CLS.
-- **No late content swap** — All content is in the initial HTML; nothing is replaced by “Loading…” then real content.
-
-Keeping other pages as static as possible (and avoiding unnecessary client islands) will keep them feeling like the home page.
+> **Design system reference:** See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for tokens, components, layouts, and usage guidelines.
 
 ---
 
-## Changes applied in this pass
+## Why the Home Page Loads Smoothly
 
-| Area | Change |
-|------|--------|
-| **Layout** | Added optional `title` and `description` props; all pages can set unique `<title>` and `<meta name="description">` for SEO. |
-| **Animations** | Removed duplicate `@keyframes fadeInUp` / `.animate-fade-in-up` from index, shop, and about; they use the global `fade-in-up` from `global.css` only. |
-| **Images (CLS)** | About page images now have `width`/`height` and the below-the-fold image uses `loading="lazy"`. |
-| **Fonts** | Layout already uses `display=swap` on the Inter font link to avoid invisible text. |
-| **Portal** | `AuthGate` now shows a same-height loading skeleton instead of `null` while auth is checked, so the page doesn’t collapse then jump. |
+- **Fully static** — No `client:only` or client-side data fetching; entire page is server-rendered HTML and CSS.
+- **Critical CSS in layout** — `Layout.astro` imports `global.css`, so styles load with the page (no FOUC).
+- **Fixed backgrounds** — Hero and overlays use `position: fixed` and `inset: 0`, so they don't cause layout shift.
+- **No late content swap** — All content is in the initial HTML; nothing is replaced by "Loading…" then real content.
 
----
-
-## Ongoing best practices
-
-### 1. **global.css and design system**
-
-- **Design tokens** — Brand colors, spacing, radius, shadows, and z-index live in `:root` and are used by Tailwind and components. Prefer these over new magic numbers.
-- **Layers** — Use `@layer base`, `@layer components`, `@layer utilities` so Tailwind and custom styles compose predictably.
-- **New animations** — Add keyframes and utility classes in `global.css` (e.g. under `@layer utilities`) instead of duplicating them in page `<style>` blocks.
-
-### 2. **Layouts**
-
-- **Layout.astro** — Use it for all main pages. Pass `title` and `description` for SEO (e.g. `<Layout title="About" description="...">`).
-- **BlogLayout / PostLayout** — Use for blog listing and posts; they already handle background and prose.
-
-### 3. **Avoiding content jumps**
-
-- **Static-first** — Prefer Astro-only pages (like index, about, shop). Add React only where needed (auth, forms, dashboard).
-- **client:only** — Used on signin, register, portal, etc. Those pages will show a brief shell until React hydrates. Portal now uses a skeleton inside `AuthGate` to keep height stable.
-- **Images** — Always set `width` and `height` (or use a wrapper with `aspect-ratio`) so layout doesn’t shift when images load. Use `loading="lazy"` for below-the-fold images.
-
-### 4. **GitHub Pages & Astro**
-
-- **Static export** — Astro’s default is static output; ensure `astro build` is used and the output (e.g. `dist/`) is deployed.
-- **Custom domain** — `astro.config.mjs` has `site: 'https://roamingbearhoneyco.com'`. If you use `username.github.io/repo`, set `base: '/repo-name/'` in the Astro config.
-
-### 5. **Supabase**
-
-- **Env vars** — Use `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY`; keep anon key public and use RLS for security.
-- **Auth** — `supabase.ts` uses `sessionStorage`, `detectSessionInUrl`, and `autoRefreshToken`; no change needed for typical auth flows.
+**Guideline:** Keep other pages as static as possible. Add React only where needed (auth, forms, dashboard).
 
 ---
 
-## Optional next steps
+## Performance & Layout
 
-- **View Transitions** — For smoother navigation between static pages, consider `@astrojs/view-transitions` (optional; can affect behavior on client:only pages).
-- **Image dimensions** — If you change about/shop images, update `width`/`height` to match actual asset dimensions for best CLS.
-- **Blog and other pages** — Add `title` and `description` to any new layout or page that uses `Layout.astro`.
+### Static-First
+- Prefer Astro-only pages (index, about, shop, privacy, terms).
+- Use `client:only="react"` only for: signin, register, portal, onboard, confirm, reset.
+
+### Avoiding Content Jumps
+- **client:only pages** — Portal uses a loading skeleton in `AuthGate` so the page doesn't collapse while auth is checked.
+- **Images** — Always set `width` and `height`. Use `loading="lazy"` for below-the-fold images.
+- **Animations** — Add keyframes in `global.css`; don't duplicate in page `<style>` blocks.
+
+### SEO
+- Pass `title` and `description` to `Layout` on every page.
+- Example: `<Layout title="About" description="Learn about Roaming Bear Honey Co.">`
+
+---
+
+## GitHub Pages & Astro
+
+- **Static export** — Astro's default. Use `astro build`; deploy `dist/`.
+- **Custom domain** — `astro.config.mjs` has `site: 'https://roamingbearhoneyco.com'`.
+- **Repo path** — If using `username.github.io/repo`, set `base: '/repo-name/'` in Astro config.
+
+---
+
+## Supabase
+
+- **Env vars** — `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`. Use RLS for security.
+- **Auth** — `supabase.ts` uses `sessionStorage`, `detectSessionInUrl`, `autoRefreshToken`.
+
+---
+
+## Optional Next Steps
+
+- **View Transitions** — Consider `@astrojs/view-transitions` for smoother navigation (may affect client:only pages).
+- **Image dimensions** — When changing about/shop images, update `width`/`height` to match actual assets.
