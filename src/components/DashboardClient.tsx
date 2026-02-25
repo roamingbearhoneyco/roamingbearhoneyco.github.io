@@ -40,7 +40,7 @@ interface Order {
   order_items: any[];
 }
 
-type TabType = 'profile' | 'subscription' | 'upgrade' | 'orders' | 'settings'
+type TabType = 'profile' | 'subscription' | 'upgrade' | 'orders'
 
 export default function DashboardClient() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -48,29 +48,33 @@ export default function DashboardClient() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('subscription')
+  const [isMobile, setIsMobile] = useState(false)
   
   const [editingProfile, setEditingProfile] = useState(false)
   const [editName, setEditName] = useState('')
-  const [editMerch, setEditMerch] = useState<string[]>([])
   
   const [saveLoading, setSaveLoading] = useState(false)
   const [message, setMessage] = useState<{ type: string; text: string } | null>(null)
+  const [savingMerch, setSavingMerch] = useState<string | null>(null)
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const loadUserData = async () => {
     setLoading(true)
     try {
-      // --- PHASE 1: THE BOUNCER (AUTH CHECK) ---
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
       if (authError || !user) {
-        // Redirecting immediately.
         window.location.href = '/signin'
-        // We return a "hanging" promise here so that 'loading' stays true.
-        // This prevents the "Red Error" UI from ever rendering before the page changes.
         return; 
       }
 
-      // --- PHASE 2: THE FETCHER (Only runs if logged in) ---
       const { data: profileData, error: profileError } = await supabase
         .from('rbhc-table-profiles')
         .select('*')
@@ -85,9 +89,7 @@ export default function DashboardClient() {
 
       setProfile(profileData)
       setEditName(profileData.first_name || '')
-      setEditMerch(profileData.merch_preferences || [])
 
-      // Fetch related data in parallel
       const [subResponse, orderResponse] = await Promise.all([
         supabase
           .from('subscriptions')
@@ -120,7 +122,6 @@ export default function DashboardClient() {
       console.error('Critical Dashboard Error:', err)
       setLoading(false)
     } finally {
-      // This only runs if we didn't trigger the redirect return above
       setLoading(false)
     }
   }
@@ -130,11 +131,10 @@ export default function DashboardClient() {
   }, [])
 
   useEffect(() => {
-    if (profile) {
+    if (editingProfile && profile) {
       setEditName(profile.first_name);
-      setEditMerch(profile.merch_preferences || []);
     }
-  }, [editingProfile, profile]);
+  }, [editingProfile]);
 
   const handleSaveProfile = async () => {
     if (!profile) return
@@ -145,14 +145,13 @@ export default function DashboardClient() {
       const { error } = await supabase
         .from('rbhc-table-profiles')
         .update({
-          first_name: editName,
-          merch_preferences: editMerch 
+          first_name: editName
         })
         .eq('id', profile.id)
 
       if (error) throw error
 
-      setProfile({ ...profile, first_name: editName, merch_preferences: editMerch })
+      setProfile({ ...profile, first_name: editName })
       setEditingProfile(false)
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
       setTimeout(() => setMessage(null), 3000)
@@ -163,8 +162,32 @@ export default function DashboardClient() {
     }
   }
 
+  const handleMerchToggle = async (item: string) => {
+    if (!profile) return
+    setSavingMerch(item)
+
+    const currentPrefs = profile.merch_preferences || []
+    const newMerchPrefs = currentPrefs.includes(item)
+      ? currentPrefs.filter(i => i !== item)
+      : [...currentPrefs, item]
+
+    try {
+      const { error } = await supabase
+        .from('rbhc-table-profiles')
+        .update({ merch_preferences: newMerchPrefs })
+        .eq('id', profile.id)
+
+      if (error) throw error
+
+      setProfile({ ...profile, merch_preferences: newMerchPrefs })
+    } catch (err) {
+      console.error('Failed to update merch preferences:', err)
+    } finally {
+      setSavingMerch(null)
+    }
+  }
+
   // RENDER LOGIC
-  // 1. Show the spinner while checking auth OR while redirecting
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
@@ -174,8 +197,6 @@ export default function DashboardClient() {
     )
   }
 
-  // 2. Only show this if loading is FINISHED and profile is still null
-  // (This handles the case where the user is logged in but doesn't have a DB record)
   if (!profile) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center card">
@@ -187,159 +208,160 @@ export default function DashboardClient() {
     )
   }
 
-  const tabList: { id: TabType; label: string }[] = [
-    { id: 'subscription', label: 'Subscription' },
-    { id: 'upgrade', label: 'Upgrade Tier' },
-    { id: 'profile', label: 'Profile' },
-    { id: 'orders', label: 'Orders' },
-    { id: 'settings', label: 'Settings' }
+  // Tab list - NO SETTINGS
+  const tabList: { id: TabType; label: string; icon?: string }[] = [
+    { id: 'subscription', label: 'Subscription', icon: '🐝' },
+    { id: 'upgrade', label: 'Upgrade Tier', icon: '⬆️' },
+    { id: 'profile', label: 'Profile', icon: '👤' },
+    { id: 'orders', label: 'Orders', icon: '📦' }
   ]
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <div className="card card-grow-in">
-        <h1 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
-          Welcome back, {profile.first_name}!
-        </h1>
-        <p className="text-[var(--color-text-secondary)]">
-          Member since {new Date(profile.created_at).toLocaleDateString()}
-        </p>
-      </div>
-
-      {message && (
-        <div className={`p-4 rounded-lg ${
-          message.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'
-        }`}>
-          {message.text}
+    <div className="px-4 py-8 space-y-6">
+      {/* Dashboard Header - Constrained to max-w-4xl */}
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Welcome Card */}
+        <div className="card card-grow-in bg-gradient-to-r from-[var(--color-primary)]/10 via-[var(--color-accent)]/10 to-[var(--color-secondary)]/10 border border-[var(--color-accent)]/20">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-primary)] mb-2">
+            Welcome back, {profile.first_name}!
+          </h1>
+          <p className="text-[var(--color-text-secondary)] text-sm sm:text-base">
+            Member since {new Date(profile.created_at).toLocaleDateString()} • Email: <span className="font-semibold">{profile.email}</span>
+          </p>
         </div>
-      )}
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 overflow-x-auto scrollbar-hide">
-        {tabList.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-3 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === tab.id
-                ? 'border-[var(--color-secondary)] text-[var(--color-secondary)]'
-                : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="mt-6">
-        {activeTab === 'subscription' && (
-          subscription ? (
-            <SubscriptionManager subscription={subscription} />
-          ) : (
-            <div className="card text-center py-12">
-               <p className="text-lg mb-6">You don't have an active subscription yet.</p>
-               <button onClick={() => setActiveTab('upgrade')} className="btn btn-primary">Explore Membership Plans</button>
-            </div>
-          )
+        {message && (
+          <div className={`p-4 rounded-lg border ${
+            message.type === 'success' 
+              ? 'bg-green-50 text-green-800 border-green-200' 
+              : 'bg-red-50 text-red-800 border-red-200'
+        }`}>
+            {message.text}
+          </div>
         )}
 
-        {activeTab === 'upgrade' && (
+        {/* Tab Navigation */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 pb-2 border-b-2 border-[var(--color-accent)]/20">
+          {tabList.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-2 sm:px-4 py-3 font-semibold border-b-4 transition-all text-xs sm:text-sm text-center ${
+                activeTab === tab.id
+                  ? 'border-b-[var(--color-secondary)] text-[var(--color-secondary)]'
+                  : 'border-b-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'
+              }`}
+            >
+              <span className="block sm:inline">{tab.icon} </span><span className="hidden sm:inline">{tab.label}</span><span className="sm:hidden text-xs">{tab.label.split(' ')[0]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab Content - Conditional Width */}
+      {activeTab === 'upgrade' ? (
+        // Tier Selector - Full Width with Enhanced Spacing
+        <div className="py-4">
           <TierSelector 
             currentTierName={subscription?.subscription_tiers?.name || 'None'}
             onUpgrade={(tierId, cycle) => console.log('Upgrade:', tierId, cycle)}
           />
-        )}
-
-        {activeTab === 'profile' && (
-          <div className="card space-y-6">
-            {editingProfile ? (
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold">Edit Profile</h3>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email (Immutable)</label>
-                  <input type="email" value={profile.email} disabled className="form-input bg-gray-50 opacity-70 cursor-not-allowed" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">First Name</label>
-                  <input 
-                    type="text" 
-                    value={editName} 
-                    onChange={e => setEditName(e.target.value)} 
-                    className="form-input" 
-                    placeholder="Enter your name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Merch Preferences</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {['T-Shirts', 'Hoodies', 'Hats', 'Stickers'].map((item) => (
-                      <label key={item} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input
-                          type="checkbox"
-                          checked={editMerch.includes(item)}
-                          onChange={(e) => {
-                            setEditMerch(prev => e.target.checked ? [...prev, item] : prev.filter(i => i !== item))
-                          }}
-                          className="mr-3 h-4 w-4 text-[var(--color-secondary)] focus:ring-[var(--color-secondary)] border-gray-300 rounded"
-                        />
-                        <span className="text-sm">{item}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button onClick={() => setEditingProfile(false)} className="flex-1 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
-                  <button onClick={handleSaveProfile} disabled={saveLoading} className="flex-1 btn btn-primary">
-                    {saveLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </div>
+        </div>
+      ) : (
+        // Other Content - Constrained Width
+        <div className="max-w-4xl mx-auto">
+          {activeTab === 'subscription' && (
+            subscription ? (
+              <SubscriptionManager subscription={subscription} />
             ) : (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-bold">Profile Details</h3>
-                  <button onClick={() => setEditingProfile(true)} className="text-[var(--color-secondary)] font-semibold hover:underline">Edit</button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-xs uppercase text-gray-500 font-bold mb-1">Email Address</p>
-                    <p className="text-lg">{profile.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase text-gray-500 font-bold mb-1">First Name</p>
-                    <p className="text-lg">{profile.first_name}</p>
-                  </div>
-                </div>
-                <div className="pt-4 border-t">
-                  <p className="text-xs uppercase text-gray-500 font-bold mb-3">Your Merch Preferences</p>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.merch_preferences?.length ? profile.merch_preferences.map(item => (
-                      <span key={item} className="px-3 py-1 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] text-sm font-medium rounded-full border border-[var(--color-secondary)]/20">
-                        {item}
-                      </span>
-                    )) : <p className="text-gray-400 italic">No preferences selected</p>}
-                  </div>
-                </div>
+              <div className="card text-center py-12 bg-gradient-to-b from-[var(--color-accent)]/5 to-[var(--color-secondary)]/5 border border-[var(--color-accent)]/20">
+                <p className="text-lg mb-6 text-[var(--color-text-primary)] font-semibold">You don't have an active subscription yet.</p>
+                <button onClick={() => setActiveTab('upgrade')} className="btn btn-primary">Explore Membership Plans</button>
               </div>
-            )}
-          </div>
-        )}
+            )
+          )}
 
-        {activeTab === 'orders' && <OrderHistory orders={orders} />}
+          {activeTab === 'profile' && (
+            <div className="card space-y-6">
+              {editingProfile ? (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold">Edit Profile</h3>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Email (Immutable)</label>
+                    <input type="email" value={profile.email} disabled className="form-input bg-gray-50 opacity-70 cursor-not-allowed w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">First Name</label>
+                    <input 
+                      type="text" 
+                      value={editName} 
+                      onChange={e => setEditName(e.target.value)} 
+                      className="form-input w-full" 
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  <p className="text-sm text-[var(--color-text-secondary)] bg-[var(--color-accent)]/5 p-3 rounded-lg border border-[var(--color-accent)]/20">
+                    💡 Tip: Update your merch preferences directly in the "Your Merch Preferences" section below—changes save instantly!
+                  </p>
+                  <div className="flex gap-3 pt-4 flex-col sm:flex-row">
+                    <button onClick={() => setEditingProfile(false)} className="flex-1 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button onClick={handleSaveProfile} disabled={saveLoading} className="flex-1 btn btn-primary">
+                      {saveLoading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center flex-col sm:flex-row gap-4">
+                    <h3 className="text-xl font-bold">Profile Details</h3>
+                    <button onClick={() => setEditingProfile(true)} className="text-[var(--color-secondary)] font-semibold hover:underline">Edit Profile</button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="p-4 bg-[var(--color-accent)]/5 rounded-lg border border-[var(--color-accent)]/20">
+                      <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-2">Email Address</p>
+                      <p className="text-lg font-semibold text-[var(--color-text-primary)]">{profile.email}</p>
+                    </div>
+                    <div className="p-4 bg-[var(--color-secondary)]/5 rounded-lg border border-[var(--color-secondary)]/20">
+                      <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-2">First Name</p>
+                      <p className="text-lg font-semibold text-[var(--color-text-primary)]">{profile.first_name || 'Not set'}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t">
+                    <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-3">Your Merch Preferences</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {['T-Shirts', 'Hoodies', 'Hats', 'Stickers'].map((item) => (
+                        <button
+                          key={item}
+                          type="button"
+                          onClick={() => handleMerchToggle(item)}
+                          disabled={savingMerch !== null}
+                          className={`p-4 border-2 rounded-lg font-semibold transition-all duration-300 text-center relative ${
+                            profile.merch_preferences?.includes(item)
+                              ? 'border-[var(--color-secondary)] bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] shadow-lg shadow-[var(--color-secondary)]/50'
+                              : 'border-[var(--color-accent)]/30 bg-white text-[var(--color-text-primary)] hover:border-[var(--color-secondary)]/50 hover:bg-[var(--color-accent)]/5'
+                          } ${savingMerch === item ? 'opacity-60' : ''}`}
+                        >
+                          {savingMerch === item && (
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <span className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-secondary)]/30 border-t-[var(--color-secondary)]"></span>
+                            </span>
+                          )}
+                          <span className={savingMerch === item ? 'opacity-0' : ''}>
+                            {profile.merch_preferences?.includes(item) && <span className="mr-2">✨</span>}
+                            {item}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
-        {activeTab === 'settings' && (
-          <div className="card border-red-100">
-            <h3 className="text-xl font-bold mb-4">Account Settings</h3>
-            <button 
-              onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')} 
-              className="w-full px-4 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-colors"
-            >
-              Sign Out of RBHC
-            </button>
-          </div>
-        )}
-      </div>
+          {activeTab === 'orders' && <OrderHistory orders={orders} />}
+        </div>
+      )}
     </div>
   )
 }

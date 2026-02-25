@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import AboutPageModals from '../components/AboutPageModals';
 ---
 
 <Layout title="About" description="Roaming Bear Honey Co. is rooted in nature and community. Learn about our mission, sustainable beekeeping, and the wild behind the brand.">
@@ -84,12 +85,15 @@ import Layout from '../layouts/Layout.astro';
       </div>
       <!-- CTA -->
       <div class="text-center mt-4">
-        <a href="/onboard" class="btn btn-primary">
+        <button id="about-join-hive-btn" class="btn btn-primary">
           Join the Hive
-        </a>
+        </button>
       </div>
     </div>
   </section>
+
+  <!-- Newsletter Modal Manager -->
+  <AboutPageModals client:load />
 </Layout>
 
 <style>

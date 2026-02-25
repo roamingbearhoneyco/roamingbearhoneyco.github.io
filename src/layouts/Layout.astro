@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import UserAuth from '../components/UserAuth';
 
 interface Props {
   title?: string;
@@ -29,33 +30,39 @@ const fullTitle = title === 'Roaming Bear Honey Co.' ? title : `${title} | Roami
       </span>
     </a>
 
-    <!-- Hamburger Toggle -->
-    <button id="menu-toggle" class="sm:hidden focus:outline-none text-[var(--color-text-light)] hover:text-[var(--color-accent)] transition-colors duration-300">
-      <svg
-        id="menu-icon"
-        class="w-6 h-6 transition-all duration-300 ease-in-out"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path id="line1" d="M3 6h18" />
-        <path id="line2" d="M3 12h18" />
-        <path id="line3" d="M3 18h18" />
-      </svg>
-    </button>
+    <!-- Desktop Nav + Auth, Mobile Auth only -->
+    <div class="flex items-center gap-4 sm:gap-8">
+      <nav class="hidden sm:flex space-x-3 sm:space-x-6 text-[var(--color-text-light)] font-medium">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/blog/1" class="nav-link">Blog</a>
+        <a href="/shop" class="nav-link">Shop</a>
+      </nav>
+      <div class="hidden sm:block">
+        <UserAuth client:only="react" />
+      </div>
+    </div>
 
-    <!-- Desktop Nav -->
-    <nav class="hidden sm:flex space-x-3 sm:space-x-6 text-[var(--color-text-light)] font-medium">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about" class="nav-link">About</a>
-      <a href="/blog/1" class="nav-link">Blog</a>
-      <a href="/shop" class="nav-link">Shop</a>
-      <a href="/portal" class="nav-link">Portal</a>
-      <a href="/onboard" class="nav-link">Onboard</a>
-    </nav>
+    <!-- Mobile Auth + Hamburger Toggle -->
+    <div class="sm:hidden flex items-center gap-2">
+      <UserAuth client:only="react" />
+      <button id="menu-toggle" class="focus:outline-none text-[var(--color-text-light)] hover:text-[var(--color-accent)] transition-colors duration-300 ml-2">
+        <svg
+          id="menu-icon"
+          class="w-6 h-6 transition-all duration-300 ease-in-out"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path id="line1" d="M3 6h18" />
+          <path id="line2" d="M3 12h18" />
+          <path id="line3" d="M3 18h18" />
+        </svg>
+      </button>
+    </div>
   </div>
 
   <!-- Mobile Nav -->
@@ -67,8 +74,6 @@ const fullTitle = title === 'Roaming Bear Honey Co.' ? title : `${title} | Roami
     <a href="/about" class="nav-link py-2">About</a>
     <a href="/blog/1" class="nav-link py-2">Blog</a>
     <a href="/shop" class="nav-link py-2">Shop</a>
-    <a href="/portal" class="nav-link py-2">Portal</a>
-    <a href="/onboard" class="nav-link py-2">Onboard</a>
   </nav>
 </header>
 
@@ -95,7 +100,7 @@ const fullTitle = title === 'Roaming Bear Honey Co.' ? title : `${title} | Roami
       </div>
 
       <!-- Footer navigation -->
-      <div class="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3">
+      <div class="grid grid-cols-2 gap-8 text-sm sm:grid-cols-2">
         <div class="space-y-3">
           <h3 class="text-xs font-semibold tracking-[0.18em] text-[var(--color-text-secondary)] uppercase">
             Explore
@@ -105,17 +110,6 @@ const fullTitle = title === 'Roaming Bear Honey Co.' ? title : `${title} | Roami
             <a href="/about" class="hover:text-[var(--color-secondary)] transition-colors duration-200">About</a>
             <a href="/blog/1" class="hover:text-[var(--color-secondary)] transition-colors duration-200">Blog</a>
             <a href="/shop" class="hover:text-[var(--color-secondary)] transition-colors duration-200">Shop</a>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-          <h3 class="text-xs font-semibold tracking-[0.18em] text-[var(--color-text-secondary)] uppercase">
-            Members
-          </h3>
-          <div class="flex flex-col space-y-2">
-            <a href="/portal" class="hover:text-[var(--color-secondary)] transition-colors duration-200">Portal</a>
-            <a href="/onboard" class="hover:text-[var(--color-secondary)] transition-colors duration-200">Onboard</a>
-            <a href="/signin" class="hover:text-[var(--color-secondary)] transition-colors duration-200">Sign In</a>
           </div>
         </div>
 

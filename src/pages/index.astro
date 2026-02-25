@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import HomepageModals from '../components/HomepageModals';
 ---
 
 <Layout description="Local. Sustainable. Wild-crafted honey from the forest to your table. Shop small-batch honey and support sustainable beekeeping.">
@@ -17,10 +18,18 @@ import Layout from '../layouts/Layout.astro';
     <p class="hero-subtitle">
       Local. Sustainable. Wild-crafted honey from the forest to your table.
     </p>
-    <a href="/shop" class="btn btn-primary">
-      Shop Now
-    </a>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <button id="browse-shop-btn" class="btn btn-primary btn-fixed whitespace-nowrap">
+        Browse Our Shop
+      </button>
+      <button id="subscribe-btn" class="btn btn-primary btn-fixed whitespace-nowrap">
+        Subscribe to Newsletter
+      </button>
+    </div>
   </section>
+
+  <!-- Modals Manager -->
+  <HomepageModals client:load />
 
   <!-- Story Content Section -->
   <section class="relative z-30 section-spacing px-4 sm:px-6">

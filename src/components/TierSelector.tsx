@@ -53,13 +53,17 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading = f
     return (priceInCents / 100).toFixed(2);
   };
 
+  const getMiddleTierIndex = Math.floor(tiers.length / 2);
+  const isMiddleTier = (index: number) => index === getMiddleTierIndex && tiers.length > 0;
+
   if (loading) {
-    return <div className="text-center py-8">Loading tiers...</div>;
+    return <div className="text-center py-12">Loading tiers...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-center gap-4 mb-8 flex-wrap">
+    <div className="space-y-8">
+      {/* Billing Cycle Selector */}
+      <div className="flex justify-center gap-3 flex-wrap">
         {[
           { value: 1, label: 'Monthly' },
           { value: 6, label: '6 Months', discount: '15% off' },
@@ -68,67 +72,128 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading = f
           <button
             key={option.value}
             onClick={() => setSelectedCycle(option.value)}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedCycle === option.value
-                ? 'bg-[var(--color-secondary)] text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-[var(--color-secondary)] text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             {option.label}
-            {option.discount && <span className="text-xs ml-1">({option.discount})</span>}
+            {option.discount && <span className="text-xs ml-2 opacity-90">({option.discount})</span>}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {tiers.map(tier => (
-          <div
-            key={tier.id}
-            className={`card flex flex-col space-y-4 ${
-              tier.name === currentTierName ? 'ring-2 ring-[var(--color-secondary)]' : ''
-            }`}
-          >
-            {tier.name === currentTierName && (
-              <div className="bg-[var(--color-accent)] text-white text-xs font-bold px-3 py-1 rounded text-center">
-                Current Plan
-              </div>
-            )}
+      {/* Tier Cards Grid - Responsive Grid Layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all">
+        {tiers.map((tier, index) => {
+          const isMiddle = isMiddleTier(index);
+          const isCurrent = tier.name === currentTierName;
 
-            <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{tier.display_name}</h3>
-            <p className="text-sm text-[var(--color-text-secondary)]">{tier.description}</p>
-
-            <div className="text-2xl font-bold text-[var(--color-secondary)]">
-              ${getPrice(tier, selectedCycle)}
-              <span className="text-sm text-gray-500">/{selectedCycle === 1 ? 'mo' : selectedCycle === 6 ? '6 mo' : 'year'}</span>
-            </div>
-
-            <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
-              {tier.benefits.honey_jars_per_year > 0 && (
-                <li>✓ {tier.benefits.honey_jars_per_year} jar{tier.benefits.honey_jars_per_year > 1 ? 's' : ''} of honey/year</li>
-              )}
-              {tier.benefits.merchandise && tier.benefits.merchandise.length > 0 && (
-                <li>✓ Exclusive merch</li>
-              )}
-              {tier.benefits.discount_percent > 0 && (
-                <li>✓ {tier.benefits.discount_percent}% discount</li>
-              )}
-            </ul>
-
-            <button
-              onClick={() => onUpgrade(tier.id, selectedCycle)}
-              disabled={isLoading || tier.name === 'free'}
-              className={`w-full py-2 rounded-lg font-semibold transition-all ${
-                tier.name === 'free'
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : tier.name === currentTierName
-                  ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
-                  : 'btn btn-secondary'
+          return (
+            <div
+              key={tier.id}
+              className={`relative flex flex-col rounded-2xl overflow-hidden transition-all transform hover:scale-105 h-full ${
+                isMiddle
+                  ? 'ring-2 ring-offset-2 ring-[var(--color-secondary)] shadow-2xl'
+                  : 'shadow-lg hover:shadow-xl'
+              } ${
+                isCurrent
+                  ? 'ring-2 ring-offset-2 ring-[var(--color-accent)]'
+                  : ''
               }`}
             >
-              {tier.name === 'free' ? 'Free Plan' : tier.name === currentTierName ? 'Current' : 'Upgrade'}
-            </button>
-          </div>
-        ))}
+              {/* Card Background */}
+              <div className={`absolute inset-0 bg-white`} />
+
+              {/* Recommended Badge - Only on Middle Tier */}
+              {isMiddle && (
+                <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-accent)] text-white py-2 text-center font-bold text-sm z-10">
+                  🐻 Recommended
+                </div>
+              )}
+
+              {/* Current Plan Badge */}
+              {isCurrent && (
+                <div className="absolute top-2 right-2 bg-[var(--color-accent)] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                  Current
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="relative z-0 p-6 space-y-4 flex flex-col h-full">
+                {/* Spacing for badge if middle tier */}
+                {isMiddle && <div className="h-8" />}
+
+                {/* Title */}
+                <h3 className="text-xl font-bold text-[var(--color-text-primary)]">
+                  {tier.display_name}
+                </h3>
+
+                {/* Description */}
+                <p className="text-sm text-[var(--color-text-secondary)] line-clamp-3">
+                  {tier.description}
+                </p>
+
+                {/* Price */}
+                <div className={`text-3xl font-bold ${
+                  isMiddle
+                    ? 'text-[var(--color-secondary)]'
+                    : 'text-[var(--color-text-primary)]'
+                }`}>
+                  ${getPrice(tier, selectedCycle)}
+                  <span className="text-sm text-gray-500 font-normal ml-1">
+                    /{selectedCycle === 1 ? 'mo' : selectedCycle === 6 ? '6 mo' : 'year'}
+                  </span>
+                </div>
+
+                {/* Benefits */}
+                <ul className="space-y-2 text-base text-[var(--color-text-secondary)] flex-grow">
+                  {tier.benefits.honey_jars_per_year > 0 && (
+                    <li className="flex items-start">
+                      <span className="text-[var(--color-secondary)] mr-2 font-bold flex-shrink-0">✓</span>
+                      <span>{tier.benefits.honey_jars_per_year} jar{tier.benefits.honey_jars_per_year > 1 ? 's' : ''} of honey/year</span>
+                    </li>
+                  )}
+                  {tier.benefits.merchandise && tier.benefits.merchandise.length > 0 && (
+                    <li className="flex items-start">
+                      <span className="text-[var(--color-secondary)] mr-2 font-bold flex-shrink-0">✓</span>
+                      <span>Exclusive merch & swag</span>
+                    </li>
+                  )}
+                  {tier.benefits.discount_percent > 0 && (
+                    <li className="flex items-start">
+                      <span className="text-[var(--color-secondary)] mr-2 font-bold flex-shrink-0">✓</span>
+                      <span>{tier.benefits.discount_percent}% member discount</span>
+                    </li>
+                  )}
+                </ul>
+
+                {/* Button */}
+                <button
+                  onClick={() => onUpgrade(tier.id, selectedCycle)}
+                  disabled={isLoading || tier.name === 'free'}
+                  className={`w-full py-3 rounded-lg font-bold transition-all transform active:scale-95 ${
+                    tier.name === 'free'
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : isCurrent
+                      ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                      : isMiddle
+                      ? 'bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-accent)] text-white hover:shadow-lg'
+                      : 'btn btn-secondary hover:scale-105'
+                  }`}
+                >
+                  {tier.name === 'free' ? 'Free Plan' : isCurrent ? 'Current Plan' : 'Select Plan'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Info Text */}
+      <div className="text-center text-sm text-[var(--color-text-secondary)]">
+        <p>All plans include priority member support and access to exclusive content.</p>
       </div>
     </div>
   );
