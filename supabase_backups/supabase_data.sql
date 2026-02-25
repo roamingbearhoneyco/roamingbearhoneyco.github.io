@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict W9hcNgBpl6gdLmY07SqPCx2o94fH4tjHXUocFyGW65VFgdVGsvKnenXBsWSK0vP
+\restrict aeH5dchGIjHkv40c5MsQkzd5GBWFWEd8eE63eC1nFCCkTzYMfrPvJfeViqRPJdz
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.1
@@ -296,13 +296,30 @@ COPY auth.audit_log_entries (instance_id, id, payload, created_at, ip_address) F
 
 
 --
+-- Data for Name: custom_oauth_providers; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
+--
+
+COPY auth.custom_oauth_providers (id, provider_type, identifier, name, client_id, client_secret, acceptable_client_ids, scopes, pkce_enabled, attribute_mapping, authorization_params, enabled, email_optional, issuer, discovery_url, skip_nonce_check, cached_discovery, discovery_cached_at, authorization_url, token_url, userinfo_url, jwks_uri, created_at, updated_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: flow_state; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
 --
 
 COPY auth.flow_state (id, user_id, auth_code, code_challenge_method, code_challenge, provider_type, provider_access_token, provider_refresh_token, created_at, updated_at, authentication_method, auth_code_issued_at, invite_token, referrer, oauth_client_state_id, linking_target_id, email_optional) FROM stdin;
+1cdd9385-ceaf-4d98-8f86-f7509e365bf1	\N	\N	\N	\N	google			2026-02-25 11:47:11.830006+00	2026-02-25 11:47:11.830006+00	oauth	\N	\N	http://localhost:4321/portal	\N	\N	f
+967d672f-2171-4456-9d39-0bce02b339c8	\N	\N	\N	\N	google			2026-02-25 14:01:04.265492+00	2026-02-25 14:01:04.265492+00	oauth	\N	\N	http://localhost:4321/portal	\N	\N	f
 77c84f4c-3e71-4212-b2b5-251789c146ec	\N	\N	\N	\N	google			2026-02-07 00:02:30.561239+00	2026-02-07 00:02:30.561239+00	oauth	\N	\N	https://testsite.roamingbearhoneyco.com/portal	\N	\N	f
 5f9ad94d-299c-4af4-8af9-67e22bd79c7d	\N	\N	\N	\N	google			2026-02-07 18:58:32.965786+00	2026-02-07 18:58:32.965786+00	oauth	\N	\N	http://localhost:4321/portal	\N	\N	f
 b8754aba-93a9-48b8-bfc5-b2754c4bc590	\N	\N	\N	\N	google			2026-02-09 22:25:27.878529+00	2026-02-09 22:25:27.878529+00	oauth	\N	\N	https://testsite.roamingbearhoneyco.com/portal	\N	\N	f
+18421768-23d7-471b-888a-d20e7e5187a4	\N	\N	\N	\N	google			2026-02-16 14:03:56.01366+00	2026-02-16 14:03:56.01366+00	oauth	\N	\N	https://testsite.roamingbearhoneyco.com/portal	\N	\N	f
+c30ca428-6d61-41dc-840f-3c04dab6766d	\N	\N	\N	\N	google			2026-02-16 14:17:42.87053+00	2026-02-16 14:17:42.87053+00	oauth	\N	\N	https://testsite.roamingbearhoneyco.com/portal	\N	\N	f
+4938ef30-ef59-407b-bc93-8a0eee35571b	\N	\N	\N	\N	google			2026-02-16 14:20:21.989448+00	2026-02-16 14:20:21.989448+00	oauth	\N	\N	https://testsite.roamingbearhoneyco.com/portal	\N	\N	f
+8fd3479f-6562-4762-9b46-31717536e592	\N	\N	\N	\N	google			2026-02-16 15:26:50.582926+00	2026-02-16 15:26:50.582926+00	oauth	\N	\N	http://localhost:4321/portal	\N	\N	f
+71fcb9c5-0536-4e26-8d95-2124a1da0668	\N	\N	\N	\N	google			2026-02-16 15:29:04.071268+00	2026-02-16 15:29:04.071268+00	oauth	\N	\N	http://localhost:4321/portal	\N	\N	f
+942aa789-0bd9-49e2-838e-dc557746c1ab	\N	\N	\N	\N	google			2026-02-16 15:30:57.902208+00	2026-02-16 15:30:57.902208+00	oauth	\N	\N	http://localhost:4321/portal	\N	\N	f
+5da259ef-d1db-4f6e-9507-a3407f94598a	\N	\N	\N	\N	google			2026-02-16 16:25:41.397747+00	2026-02-16 16:25:41.397747+00	oauth	\N	\N	https://testsite.roamingbearhoneyco.com/portal	\N	\N	f
 \.
 
 
@@ -311,8 +328,9 @@ b8754aba-93a9-48b8-bfc5-b2754c4bc590	\N	\N	\N	\N	google			2026-02-09 22:25:27.87
 --
 
 COPY auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) FROM stdin;
-00000000-0000-0000-0000-000000000000	150b2f58-07fc-4e22-a776-e6c540db7461	authenticated	authenticated	justinmcintyre3@gmail.com	\N	2026-02-09 22:26:12.173705+00	\N		\N		\N			\N	2026-02-09 23:28:48.683312+00	{"provider": "google", "providers": ["google"]}	{"iss": "https://accounts.google.com", "sub": "102089393456770420162", "name": "justin mcintyre", "email": "justinmcintyre3@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "full_name": "justin mcintyre", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "provider_id": "102089393456770420162", "email_verified": true, "phone_verified": false}	\N	2026-02-09 22:26:11.535592+00	2026-02-13 22:48:04.112938+00	\N	\N			\N		0	\N		\N	f	\N	f
 00000000-0000-0000-0000-000000000000	b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	authenticated	authenticated	bricewhitley@gmail.com	$2a$10$3owHZngfhTcBsP.dFzLLfucpZHTyVDyzA7uBhn8oZGodQfcAKynJi	2026-02-10 01:37:24.256882+00	\N		2026-02-10 01:36:20.940805+00		\N			\N	2026-02-10 01:37:24.265985+00	{"provider": "email", "providers": ["email"]}	{"sub": "b1e57433-e952-4f52-9fec-0f5cb8a6d7c1", "email": "bricewhitley@gmail.com", "email_verified": true, "phone_verified": false}	\N	2026-02-10 01:36:19.834105+00	2026-02-15 00:42:45.009755+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	90b30f7b-08b8-4e7b-990e-44389c4049b2	authenticated	authenticated	justinmcintyre3@gmail.com	\N	2026-02-16 19:01:51.247911+00	\N		\N		\N			\N	2026-02-25 14:27:42.879122+00	{"provider": "google", "providers": ["google"]}	{"iss": "https://accounts.google.com", "sub": "102089393456770420162", "name": "justin mcintyre", "email": "justinmcintyre3@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "full_name": "justin mcintyre", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "provider_id": "102089393456770420162", "email_verified": true, "phone_verified": false}	\N	2026-02-16 19:01:50.295136+00	2026-02-25 15:46:12.058607+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	e9745b7b-8e14-4c45-b678-56d6ca26f567	authenticated	authenticated	stefanross@gvtc.com	$2a$10$9NkBsrN.fHkhOKwxvRdiTub4DUapryngHaDfl9/DPQm7kRTOeL.kG	2026-02-16 17:54:20.174576+00	\N		2026-02-16 17:53:14.246831+00		\N			\N	2026-02-16 17:54:20.184255+00	{"provider": "email", "providers": ["email"]}	{"sub": "e9745b7b-8e14-4c45-b678-56d6ca26f567", "email": "stefanross@gvtc.com", "email_verified": true, "phone_verified": false}	\N	2026-02-16 17:53:13.09224+00	2026-02-16 17:54:20.217624+00	\N	\N			\N		0	\N		\N	f	\N	f
 \.
 
 
@@ -321,8 +339,9 @@ COPY auth.users (instance_id, id, aud, role, email, encrypted_password, email_co
 --
 
 COPY auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at, id) FROM stdin;
-102089393456770420162	150b2f58-07fc-4e22-a776-e6c540db7461	{"iss": "https://accounts.google.com", "sub": "102089393456770420162", "name": "justin mcintyre", "email": "justinmcintyre3@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "full_name": "justin mcintyre", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "provider_id": "102089393456770420162", "email_verified": true, "phone_verified": false}	google	2026-02-09 22:26:12.159914+00	2026-02-09 22:26:12.159968+00	2026-02-09 23:28:48.669127+00	5303da56-db3d-474b-a9db-0c94bd2ce39d
+102089393456770420162	90b30f7b-08b8-4e7b-990e-44389c4049b2	{"iss": "https://accounts.google.com", "sub": "102089393456770420162", "name": "justin mcintyre", "email": "justinmcintyre3@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "full_name": "justin mcintyre", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJ-EKoz21cuFrMrhnIP6tvuYPlrJMrmR_oeeFrZykrJWs9XLA=s96-c", "provider_id": "102089393456770420162", "email_verified": true, "phone_verified": false}	google	2026-02-16 19:01:51.236272+00	2026-02-16 19:01:51.236348+00	2026-02-25 14:27:42.873356+00	acafcc19-b221-45d9-95b7-012434b047fb
 b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	{"sub": "b1e57433-e952-4f52-9fec-0f5cb8a6d7c1", "email": "bricewhitley@gmail.com", "email_verified": true, "phone_verified": false}	email	2026-02-10 01:36:20.917979+00	2026-02-10 01:36:20.918033+00	2026-02-10 01:36:20.918033+00	54566b46-8615-4943-ab08-99482f4762cd
+e9745b7b-8e14-4c45-b678-56d6ca26f567	e9745b7b-8e14-4c45-b678-56d6ca26f567	{"sub": "e9745b7b-8e14-4c45-b678-56d6ca26f567", "email": "stefanross@gvtc.com", "email_verified": true, "phone_verified": false}	email	2026-02-16 17:53:14.23034+00	2026-02-16 17:53:14.230398+00	2026-02-16 17:53:14.230398+00	f5bd2427-f81e-42d0-ae55-fa71b5d1c5ad
 \.
 
 
@@ -347,8 +366,11 @@ COPY auth.oauth_clients (id, client_secret_hash, registration_type, redirect_uri
 --
 
 COPY auth.sessions (id, user_id, created_at, updated_at, factor_id, aal, not_after, refreshed_at, user_agent, ip, tag, oauth_client_id, refresh_token_hmac_key, refresh_token_counter, scopes) FROM stdin;
-616da61b-61d5-4e8d-9e0b-0d1cde39a223	150b2f58-07fc-4e22-a776-e6c540db7461	2026-02-09 23:28:48.68348+00	2026-02-13 22:48:04.125345+00	\N	aal1	\N	2026-02-13 22:48:04.125203	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36	130.45.156.4	\N	\N	\N	\N	\N
+08310d10-7081-483c-be29-56632baf041c	90b30f7b-08b8-4e7b-990e-44389c4049b2	2026-02-25 12:44:56.317509+00	2026-02-25 14:02:32.312458+00	\N	aal1	\N	2026-02-25 14:02:32.31235	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36	130.45.156.4	\N	\N	\N	\N	\N
 c5ea310b-3ced-47c9-b9cf-16527c61660b	b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	2026-02-10 01:37:24.266676+00	2026-02-15 00:42:45.030008+00	\N	aal1	\N	2026-02-15 00:42:45.029266	Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1	23.120.165.116	\N	\N	\N	\N	\N
+008dd664-14ee-4135-92fd-eeffb4047a13	e9745b7b-8e14-4c45-b678-56d6ca26f567	2026-02-16 17:54:20.184381+00	2026-02-16 17:54:20.184381+00	\N	aal1	\N	\N	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36	96.8.185.223	\N	\N	\N	\N	\N
+16fa1016-7013-4d2c-be24-57553d3467b6	90b30f7b-08b8-4e7b-990e-44389c4049b2	2026-02-25 14:02:49.363749+00	2026-02-25 14:02:49.363749+00	\N	aal1	\N	\N	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.109.5 Chrome/142.0.7444.265 Electron/39.3.0 Safari/537.36	130.45.156.4	\N	\N	\N	\N	\N
+ba461657-3caf-4ccd-a8e7-f6cb7a52561e	90b30f7b-08b8-4e7b-990e-44389c4049b2	2026-02-25 14:27:42.881984+00	2026-02-25 15:46:12.073325+00	\N	aal1	\N	2026-02-25 15:46:12.073132	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36	130.45.156.4	\N	\N	\N	\N	\N
 \.
 
 
@@ -357,8 +379,11 @@ c5ea310b-3ced-47c9-b9cf-16527c61660b	b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	2026-0
 --
 
 COPY auth.mfa_amr_claims (session_id, created_at, updated_at, authentication_method, id) FROM stdin;
-616da61b-61d5-4e8d-9e0b-0d1cde39a223	2026-02-09 23:28:48.706671+00	2026-02-09 23:28:48.706671+00	oauth	2a8b99e9-eebe-4e63-a680-a2ef6fb7a1f6
 c5ea310b-3ced-47c9-b9cf-16527c61660b	2026-02-10 01:37:24.313073+00	2026-02-10 01:37:24.313073+00	otp	9714ef52-af41-4fc6-af96-3072e2986c62
+008dd664-14ee-4135-92fd-eeffb4047a13	2026-02-16 17:54:20.220721+00	2026-02-16 17:54:20.220721+00	otp	f98a2161-8744-48fc-b2d7-25a6470948c4
+08310d10-7081-483c-be29-56632baf041c	2026-02-25 12:44:56.338822+00	2026-02-25 12:44:56.338822+00	oauth	54bc8395-1712-413b-a239-9b2a3beb0b0f
+16fa1016-7013-4d2c-be24-57553d3467b6	2026-02-25 14:02:49.371204+00	2026-02-25 14:02:49.371204+00	oauth	2c1e2093-4f74-4488-b58e-b077d350ca29
+ba461657-3caf-4ccd-a8e7-f6cb7a52561e	2026-02-25 14:27:42.924671+00	2026-02-25 14:27:42.924671+00	oauth	7416375e-9cc6-435b-8d89-63d0e7041695
 \.
 
 
@@ -415,12 +440,15 @@ COPY auth.one_time_tokens (id, user_id, token_type, token_hash, relates_to, crea
 --
 
 COPY auth.refresh_tokens (instance_id, id, token, user_id, revoked, created_at, updated_at, parent, session_id) FROM stdin;
+00000000-0000-0000-0000-000000000000	191	nldtqlksavpn	90b30f7b-08b8-4e7b-990e-44389c4049b2	t	2026-02-25 12:44:56.329849+00	2026-02-25 14:02:32.263808+00	\N	08310d10-7081-483c-be29-56632baf041c
+00000000-0000-0000-0000-000000000000	192	bvr3m6fynljy	90b30f7b-08b8-4e7b-990e-44389c4049b2	f	2026-02-25 14:02:32.291918+00	2026-02-25 14:02:32.291918+00	nldtqlksavpn	08310d10-7081-483c-be29-56632baf041c
+00000000-0000-0000-0000-000000000000	193	vv354hxdzdn6	90b30f7b-08b8-4e7b-990e-44389c4049b2	f	2026-02-25 14:02:49.368346+00	2026-02-25 14:02:49.368346+00	\N	16fa1016-7013-4d2c-be24-57553d3467b6
+00000000-0000-0000-0000-000000000000	194	3uvbeyfbewph	90b30f7b-08b8-4e7b-990e-44389c4049b2	t	2026-02-25 14:27:42.899462+00	2026-02-25 15:46:12.008853+00	\N	ba461657-3caf-4ccd-a8e7-f6cb7a52561e
+00000000-0000-0000-0000-000000000000	195	fwq2adkzvmgc	90b30f7b-08b8-4e7b-990e-44389c4049b2	f	2026-02-25 15:46:12.037175+00	2026-02-25 15:46:12.037175+00	3uvbeyfbewph	ba461657-3caf-4ccd-a8e7-f6cb7a52561e
 00000000-0000-0000-0000-000000000000	163	jdqviur5ta4z	b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	t	2026-02-10 01:37:24.28959+00	2026-02-10 04:02:35.403962+00	\N	c5ea310b-3ced-47c9-b9cf-16527c61660b
-00000000-0000-0000-0000-000000000000	162	gqxuzliviiui	150b2f58-07fc-4e22-a776-e6c540db7461	t	2026-02-09 23:28:48.697067+00	2026-02-13 21:46:52.808919+00	\N	616da61b-61d5-4e8d-9e0b-0d1cde39a223
-00000000-0000-0000-0000-000000000000	165	jvyykxyptluz	150b2f58-07fc-4e22-a776-e6c540db7461	t	2026-02-13 21:46:52.839628+00	2026-02-13 22:48:04.081284+00	gqxuzliviiui	616da61b-61d5-4e8d-9e0b-0d1cde39a223
-00000000-0000-0000-0000-000000000000	166	mywf2wpmbnb5	150b2f58-07fc-4e22-a776-e6c540db7461	f	2026-02-13 22:48:04.101264+00	2026-02-13 22:48:04.101264+00	jvyykxyptluz	616da61b-61d5-4e8d-9e0b-0d1cde39a223
 00000000-0000-0000-0000-000000000000	164	5i72zwvzfk2p	b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	t	2026-02-10 04:02:35.433917+00	2026-02-15 00:42:44.947876+00	jdqviur5ta4z	c5ea310b-3ced-47c9-b9cf-16527c61660b
 00000000-0000-0000-0000-000000000000	167	azuohl6xplmr	b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	f	2026-02-15 00:42:44.983093+00	2026-02-15 00:42:44.983093+00	5i72zwvzfk2p	c5ea310b-3ced-47c9-b9cf-16527c61660b
+00000000-0000-0000-0000-000000000000	186	6r6tftvbhx4z	e9745b7b-8e14-4c45-b678-56d6ca26f567	f	2026-02-16 17:54:20.199852+00	2026-02-16 17:54:20.199852+00	\N	008dd664-14ee-4135-92fd-eeffb4047a13
 \.
 
 
@@ -527,6 +555,7 @@ COPY auth.schema_migrations (version) FROM stdin;
 20251201000000
 20260115000000
 20260121000000
+20260219120000
 \.
 
 
@@ -543,8 +572,9 @@ COPY auth.sso_domains (id, sso_provider_id, domain, created_at, updated_at) FROM
 --
 
 COPY public."rbhc-table-profiles" (user_id, created_at, email, brevo_contact_id, subscribed, last_synced, first_name, id, merch_preferences) FROM stdin;
+e9745b7b-8e14-4c45-b678-56d6ca26f567	2026-02-16 17:53:13.089978	stefanross@gvtc.com	53	t	2026-02-16 17:53:13.089978+00	Stefan	43	{}
+90b30f7b-08b8-4e7b-990e-44389c4049b2	2026-02-16 19:01:50.288414	justinmcintyre3@gmail.com	54	t	2026-02-16 19:01:50.288414+00	Justin	45	{Stickers,Hoodies,T-Shirts,Hats}
 b1e57433-e952-4f52-9fec-0f5cb8a6d7c1	2026-02-10 01:36:19.832444	bricewhitley@gmail.com	52	t	2026-02-10 01:36:19.832444+00	Friend	40	{}
-150b2f58-07fc-4e22-a776-e6c540db7461	2026-02-09 22:26:11.531699	justinmcintyre3@gmail.com	\N	t	\N	Justin	31	{Hoodies,Hats}
 \.
 
 
@@ -589,8 +619,9 @@ COPY public.subscription_tiers (id, name, display_name, description, price_month
 --
 
 COPY public.subscriptions (id, tier_id, stripe_customer_id, stripe_subscription_id, billing_cycle, status, next_renewal_date, created_at, updated_at, profile_id) FROM stdin;
-15	1	\N	\N	1	active	\N	2026-02-09 22:26:11.531699+00	2026-02-09 22:26:11.531699+00	31
 16	1	\N	\N	1	active	\N	2026-02-10 01:36:19.832444+00	2026-02-10 01:36:19.832444+00	40
+17	1	\N	\N	1	active	\N	2026-02-16 17:53:13.089978+00	2026-02-16 17:53:13.089978+00	43
+18	1	\N	\N	1	active	\N	2026-02-16 19:01:50.288414+00	2026-02-16 19:01:50.288414+00	45
 \.
 
 
@@ -868,7 +899,7 @@ abc46386-fb9a-48c1-9221-ab61f5a6f07c	service_role_key	Internal key for triggerin
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('auth.refresh_tokens_id_seq', 167, true);
+SELECT pg_catalog.setval('auth.refresh_tokens_id_seq', 195, true);
 
 
 --
@@ -896,7 +927,7 @@ SELECT pg_catalog.setval('public.products_id_seq', 1, false);
 -- Name: rbhc-table-profiles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."rbhc-table-profiles_id_seq"', 40, true);
+SELECT pg_catalog.setval('public."rbhc-table-profiles_id_seq"', 45, true);
 
 
 --
@@ -910,7 +941,7 @@ SELECT pg_catalog.setval('public.subscription_tiers_id_seq', 4, true);
 -- Name: subscriptions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.subscriptions_id_seq', 16, true);
+SELECT pg_catalog.setval('public.subscriptions_id_seq', 18, true);
 
 
 --
@@ -924,5 +955,5 @@ SELECT pg_catalog.setval('realtime.subscription_id_seq', 1, false);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict W9hcNgBpl6gdLmY07SqPCx2o94fH4tjHXUocFyGW65VFgdVGsvKnenXBsWSK0vP
+\unrestrict aeH5dchGIjHkv40c5MsQkzd5GBWFWEd8eE63eC1nFCCkTzYMfrPvJfeViqRPJdz
 

@@ -1,207 +1,107 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "std/server";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Stripe from "stripe";
 
-const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-// Initialize Supabase client with service role (bypass RLS)
-const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-
-// Stripe webhook signature verification (basic implementation)
-async function verifyWebhookSignature(
-  body: string,
-  signature: string
-): Promise<boolean> {
-  // For production: use crypto.subtle to verify HMAC-SHA256
-  // For now: basic validation - in production use Stripe CLI or proper verification
-  return signature && STRIPE_WEBHOOK_SECRET ? true : false;
-}
-
-serve(async (req) => {
-  // Only accept POST requests
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-    });
-  }
-
-  try {
-    const signature = req.headers.get("stripe-signature");
-    const body = await req.text();
-
-    // Verify webhook signature
-    if (!(await verifyWebhookSignature(body, signature!))) {
-      return new Response(JSON.stringify({ error: "Invalid signature" }), {
-        status: 401,
-      });
-    }
-
-    const event = JSON.parse(body);
-    const { type, data } = event;
-
-    console.log(`Processing Stripe webhook: ${type}`);
-
-    // Handle different Stripe events
-    switch (type) {
-      case "checkout.session.completed":
-        return await handleCheckoutSessionCompleted(data.object);
-
-      case "customer.subscription.updated":
-        return await handleSubscriptionUpdated(data.object);
-
-      case "customer.subscription.deleted":
-        return await handleSubscriptionDeleted(data.object);
-
-      default:
-        console.log(`Unhandled event type: ${type}`);
-        return new Response(JSON.stringify({ received: true }), {
-          status: 200,
-        });
-    }
-  } catch (error) {
-    console.error("Webhook error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
-  }
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
+  httpClient: Stripe.createFetchHttpClient(),
 });
 
-async function handleCheckoutSessionCompleted(session: any) {
-  console.log("Checkout session completed:", session.id);
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
 
-  const {
-    customer: stripeCustomerId,
-    subscription: stripeSubscriptionId,
-    metadata,
-  } = session;
+serve(async (req) => {
+  const signature = req.headers.get("stripe-signature");
+  const body = await req.text();
 
-  if (!stripeCustomerId || !stripeSubscriptionId || !metadata?.profile_id) {
-    return new Response(JSON.stringify({ error: "Missing required fields" }), {
-      status: 400,
-    });
-  }
-
-  const profileId = parseInt(metadata.profile_id);
-  const tierId = parseInt(metadata.tier_id);
-
-  // Fetch subscription details to get renewal date and status
   try {
-    // Fetch the subscription from Stripe (in production, use Stripe SDK)
-    // For now, we'll calculate next_renewal_date based on creation
-    const now = new Date();
-    const nextRenewalDate = new Date(
-      now.getTime() + parseInt(metadata.billing_cycle) * 24 * 60 * 60 * 1000 * 30
+    // 1. Verify the event actually came from Stripe
+    const event = stripe.webhooks.constructEvent(
+      body,
+      signature!,
+      Deno.env.get("STRIPE_WEBHOOK_SECRET")!
     );
 
-    // Update or create subscription in our database
-    const { error } = await supabase
-      .from("subscriptions")
-      .update({
-        tier_id: tierId,
-        stripe_customer_id: stripeCustomerId,
-        stripe_subscription_id: stripeSubscriptionId,
-        status: "active",
-        next_renewal_date: nextRenewalDate.toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("profile_id", profileId);
+    console.log(`🔔 Event Received: ${event.type}`);
 
-    if (error) {
-      console.error("Database update error:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 400,
-      });
+    switch (event.type) {
+      
+      // CASE 1: INITIAL PURCHASE
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const { profile_id, tier_id, billing_cycle } = session.metadata!;
+        
+        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+        const nextRenewal = new Date(subscription.current_period_end * 1000).toISOString();
+
+        const { error } = await supabase.from("subscriptions").update({
+          tier_id: parseInt(tier_id),
+          billing_cycle: parseInt(billing_cycle),
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string,
+          status: subscription.status, // "active"
+          next_renewal_date: nextRenewal,
+          updated_at: new Date().toISOString(),
+        }).eq("profile_id", profile_id);
+
+        if (error) throw error;
+        console.log(`✅ Subscription Created for Profile: ${profile_id}`);
+        break;
+      }
+
+      // CASE 2: SUCCESSFUL RENEWAL (Every 1, 6, or 12 months)
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        // Skip if this isn't a subscription invoice
+        if (!invoice.subscription) break;
+
+        const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+        const nextRenewal = new Date(subscription.current_period_end * 1000).toISOString();
+
+        const { error } = await supabase.from("subscriptions").update({
+          status: "active",
+          next_renewal_date: nextRenewal,
+          updated_at: new Date().toISOString(),
+        }).eq("stripe_subscription_id", invoice.subscription);
+
+        if (error) throw error;
+        console.log(`✅ Renewal Processed for Subscription: ${invoice.subscription}`);
+        break;
+      }
+
+      // CASE 3: PAYMENT FAILED
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        await supabase.from("subscriptions").update({
+          status: "past_due",
+          updated_at: new Date().toISOString(),
+        }).eq("stripe_subscription_id", invoice.subscription);
+
+        console.log(`⚠️ Payment Failed for Subscription: ${invoice.subscription}`);
+        break;
+      }
+
+      // CASE 4: CANCELLATION OR MODIFICATION
+      case "customer.subscription.deleted":
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        await supabase.from("subscriptions").update({
+          status: sub.status,
+          updated_at: new Date().toISOString(),
+        }).eq("stripe_subscription_id", sub.id);
+
+        console.log(`ℹ️ Subscription ${sub.id} status updated to: ${sub.status}`);
+        break;
+      }
+
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
 
     return new Response(JSON.stringify({ received: true }), { status: 200 });
-  } catch (error) {
-    console.error("Error processing checkout session:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
+  } catch (err) {
+    console.error(`❌ Webhook Error: ${err.message}`);
+    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
-}
-
-async function handleSubscriptionUpdated(subscription: any) {
-  console.log("Subscription updated:", subscription.id);
-
-  const { customer: stripeCustomerId, id: stripeSubscriptionId, status } =
-    subscription;
-
-  // Find the subscription in our database
-  const { data: subscriptionRecord, error: findError } = await supabase
-    .from("subscriptions")
-    .select("id, profile_id")
-    .eq("stripe_subscription_id", stripeSubscriptionId)
-    .single();
-
-  if (findError) {
-    console.error("Could not find subscription:", findError);
-    return new Response(JSON.stringify({ error: "Subscription not found" }), {
-      status: 404,
-    });
-  }
-
-  // Calculate next renewal date based on Stripe subscription
-  const nextRenewalDate = subscription.current_period_end
-    ? new Date(subscription.current_period_end * 1000).toISOString()
-    : null;
-
-  // Update subscription status
-  const { error: updateError } = await supabase
-    .from("subscriptions")
-    .update({
-      status,
-      next_renewal_date: nextRenewalDate,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", subscriptionRecord.id);
-
-  if (updateError) {
-    console.error("Database update error:", updateError);
-    return new Response(JSON.stringify({ error: updateError.message }), {
-      status: 400,
-    });
-  }
-
-  return new Response(JSON.stringify({ received: true }), { status: 200 });
-}
-
-async function handleSubscriptionDeleted(subscription: any) {
-  console.log("Subscription deleted:", subscription.id);
-
-  const { id: stripeSubscriptionId } = subscription;
-
-  // Find and mark subscription as canceled
-  const { data: subscriptionRecord, error: findError } = await supabase
-    .from("subscriptions")
-    .select("id")
-    .eq("stripe_subscription_id", stripeSubscriptionId)
-    .single();
-
-  if (findError) {
-    console.error("Could not find subscription:", findError);
-    return new Response(JSON.stringify({ error: "Subscription not found" }), {
-      status: 404,
-    });
-  }
-
-  // Update subscription status to canceled
-  const { error: updateError } = await supabase
-    .from("subscriptions")
-    .update({
-      status: "canceled",
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", subscriptionRecord.id);
-
-  if (updateError) {
-    console.error("Database update error:", updateError);
-    return new Response(JSON.stringify({ error: updateError.message }), {
-      status: 400,
-    });
-  }
-
-  return new Response(JSON.stringify({ received: true }), { status: 200 });
-}
+});
