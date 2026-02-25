@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "https://deno.land/x/stripe/": "https://deno.land/x/stripe@v0.0.1/"
+  }
+}

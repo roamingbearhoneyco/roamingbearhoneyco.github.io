@@ -18,14 +18,16 @@ interface Tier {
 
 interface TierSelectorProps {
   currentTierName?: string;
-  onUpgrade: (tierId: number, billingCycle: number) => void;
+  onUpgrade?: (tierId: number, billingCycle: number) => void;
   isLoading?: boolean;
 }
 
-export default function TierSelector({ currentTierName, onUpgrade, isLoading = false }: TierSelectorProps) {
+export default function TierSelector({ currentTierName, onUpgrade, isLoading: externalLoading = false }: TierSelectorProps) {
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [selectedCycle, setSelectedCycle] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTiers = async () => {
@@ -53,6 +55,58 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading = f
     return (priceInCents / 100).toFixed(2);
   };
 
+  const handleUpgradeClick = async (tierId: number, billingCycle: number) => {
+    // If custom callback provided, use it
+    if (onUpgrade) {
+      onUpgrade(tierId, billingCycle);
+      return;
+    }
+
+    // Otherwise, use built-in Stripe checkout
+    setCheckoutLoading(tierId);
+    setError(null);
+
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.access_token) {
+        setError('Please sign in to upgrade your plan');
+        setCheckoutLoading(null);
+        return;
+      }
+
+      // Call checkout endpoint
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          tier_id: tierId,
+          billing_cycle: billingCycle,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to start checkout');
+        setCheckoutLoading(null);
+        return;
+      }
+
+      // Redirect to Stripe checkout
+      if (data.sessionUrl) {
+        window.location.href = data.sessionUrl;
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      setError(message);
+      setCheckoutLoading(null);
+    }
+  };
+
   const getMiddleTierIndex = Math.floor(tiers.length / 2);
   const isMiddleTier = (index: number) => index === getMiddleTierIndex && tiers.length > 0;
 
@@ -62,6 +116,13 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading = f
 
   return (
     <div className="space-y-8">
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg max-w-4xl mx-auto">
+          {error}
+        </div>
+      )}
+
       {/* Billing Cycle Selector */}
       <div className="flex justify-center gap-3 flex-wrap">
         {[
@@ -171,18 +232,23 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading = f
 
                 {/* Button */}
                 <button
-                  onClick={() => onUpgrade(tier.id, selectedCycle)}
-                  disabled={isLoading || tier.name === 'free'}
-                  className={`w-full py-3 rounded-lg font-bold transition-all transform active:scale-95 ${
+                  onClick={() => handleUpgradeClick(tier.id, selectedCycle)}
+                  disabled={externalLoading || checkoutLoading !== null || tier.name === 'free' || isCurrent}
+                  className={`w-full py-3 rounded-lg font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${
                     tier.name === 'free'
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : isCurrent
                       ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                      : checkoutLoading === tier.id
+                      ? 'bg-opacity-70 cursor-wait'
                       : isMiddle
                       ? 'bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-accent)] text-white hover:shadow-lg'
                       : 'btn btn-secondary hover:scale-105'
                   }`}
                 >
+                  {checkoutLoading === tier.id && (
+                    <span className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></span>
+                  )}
                   {tier.name === 'free' ? 'Free Plan' : isCurrent ? 'Current Plan' : 'Select Plan'}
                 </button>
               </div>
