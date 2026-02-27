@@ -434,6 +434,15 @@
       padding-bottom: var(--space-3xl);
     }
   }
+
+  @media (min-width: 1024px) {
+    .hero-compact {
+      min-height: 45vh;
+    }
+    .section-hero-content-compact {
+      padding-top: 0;
+    }
+  }
 }
 
 /* ===== ANIMATIONS ===== */
