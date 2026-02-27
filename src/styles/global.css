@@ -318,7 +318,8 @@
   
   /* Hero Sections */
   .hero {
-    min-height: 80vh;
+    /* reduce vertical footprint so content appears sooner */
+    min-height: 60vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -341,7 +342,7 @@
     font-size: clamp(1.125rem, 3vw, 1.5rem);
     font-weight: 500;
     max-width: 600px;
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-sm);
     color: var(--color-text-light);
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
   }
@@ -393,29 +394,31 @@
   
   /* Section Spacing Utilities */
   .section-spacing {
-    padding-top: var(--space-3xl);
-    padding-bottom: var(--space-3xl);
-  }
-  
-  .section-spacing-lg {
-    padding-top: var(--space-3xl);
-    padding-bottom: var(--space-3xl);
-  }
-  
-  .section-spacing-md {
+    /* default generous spacing reduced slightly */
     padding-top: var(--space-2xl);
     padding-bottom: var(--space-2xl);
   }
   
-  .section-spacing-sm {
+  .section-spacing-lg {
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
+  }
+  
+  .section-spacing-md {
     padding-top: var(--space-xl);
     padding-bottom: var(--space-xl);
   }
   
+  .section-spacing-sm {
+    padding-top: var(--space-sm);
+    padding-bottom: var(--space-sm);
+  }
+  
   /* Hero-to-content transition spacing (compact top for better visual flow) */
   .section-hero-content {
-    padding-top: var(--space-2xl);
-    padding-bottom: var(--space-3xl);
+    /* tighten vertical gap under hero */
+    padding-top: var(--space-lg);
+    padding-bottom: var(--space-2xl);
   }
   
   /* Responsive section spacing */
@@ -427,7 +430,7 @@
     }
     
     .section-hero-content {
-      padding-top: var(--space-2xl);
+      padding-top: var(--space-xl);
       padding-bottom: var(--space-3xl);
     }
   }
