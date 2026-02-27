@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import NewsletterModal from './NewsletterModal';
-import ShopModal from './ShopModal';
 
 export default function HomepageModals() {
   const [isNewsletterOpen, setIsNewsletterOpen] = useState(false);
-  const [isShopOpen, setIsShopOpen] = useState(false);
 
   useEffect(() => {
     const browseShopBtn = document.getElementById('browse-shop-btn');
@@ -12,7 +10,7 @@ export default function HomepageModals() {
 
     const handleShopClick = (e: Event) => {
       e.preventDefault();
-      setIsShopOpen(true);
+      window.location.href = '/shop';
     };
 
     const handleSubscribeClick = (e: Event) => {
@@ -30,9 +28,6 @@ export default function HomepageModals() {
   }, []);
 
   return (
-    <>
-      <NewsletterModal isOpen={isNewsletterOpen} onClose={() => setIsNewsletterOpen(false)} />
-      <ShopModal isOpen={isShopOpen} onClose={() => setIsShopOpen(false)} />
-    </>
+    <NewsletterModal isOpen={isNewsletterOpen} onClose={() => setIsNewsletterOpen(false)} />
   );
 }
