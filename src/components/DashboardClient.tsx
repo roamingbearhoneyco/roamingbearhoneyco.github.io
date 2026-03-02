@@ -228,8 +228,8 @@ export default function DashboardClient() {
           <p className="text-[var(--color-text-secondary)] text-xs sm:text-base">
             Member since {new Date(profile.created_at).toLocaleDateString()}
           </p>
-          <p className="text-[var(--color-text-secondary)] text-xs sm:text-base truncate min-w-0" title={profile.email}>
-            Email: <span className="font-semibold">{profile.email}</span>
+          <p className="text-[var(--color-text-secondary)] text-xs sm:text-base min-w-0" title={profile.email}>
+            Email: <span className="font-semibold break-all">{profile.email}</span>
           </p>
         </div>
 
@@ -324,7 +324,7 @@ export default function DashboardClient() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div className="p-3 sm:p-4 bg-[var(--color-accent)]/5 rounded-lg border border-[var(--color-accent)]/20 min-w-0">
                       <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-1 sm:mb-2">Email Address</p>
-                      <p className="text-sm sm:text-lg font-semibold text-[var(--color-text-primary)] truncate" title={profile.email}>{profile.email}</p>
+                      <p className="text-xs sm:text-lg font-semibold text-[var(--color-text-primary)] break-all" title={profile.email}>{profile.email}</p>
                     </div>
                     <div className="p-3 sm:p-4 bg-[var(--color-secondary)]/5 rounded-lg border border-[var(--color-secondary)]/20">
                       <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-1 sm:mb-2">First Name</p>
