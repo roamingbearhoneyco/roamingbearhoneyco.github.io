@@ -244,22 +244,41 @@ export default function DashboardClient() {
         )}
 
         {/* Tab Navigation */}
-        <div className="grid grid-cols-4 gap-0.5 sm:gap-1 pb-2 border-b-2 border-[var(--color-accent)]/20">
-          {tabList.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-1 sm:px-4 py-2 sm:py-3 font-semibold border-b-4 transition-all text-[10px] sm:text-sm text-center ${
-                activeTab === tab.id
-                  ? 'border-b-[var(--color-secondary)] text-[var(--color-secondary)]'
-                  : 'border-b-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'
-              }`}
-            >
-              <span className="block sm:inline text-base sm:text-sm">{tab.icon}</span>
-              <span className="hidden sm:inline"> {tab.label}</span>
-              <span className="sm:hidden text-[10px] leading-tight block">{tab.label.split(' ')[0]}</span>
-            </button>
-          ))}
+        {/* Tab Navigation - Option 2: Floating Pills */}
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center sm:justify-center gap-2 pb-4 border-b-2 border-[var(--color-accent)]/10">
+          {tabList.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 
+                  px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold 
+                  transition-all duration-200 shadow-sm min-w-[70px] sm:min-w-0
+                  ${isActive 
+                    ? 'bg-white border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] scale-105 shadow-md z-10' 
+                    : 'bg-white/70 border-2 border-transparent text-[var(--color-text-secondary)] hover:bg-white hover:border-[var(--color-accent)]/30'
+                  }
+                `}
+              >
+                {/* Icon */}
+                <span className="text-lg sm:text-xl leading-none">
+                  {tab.icon}
+                </span>
+
+                {/* Label - Standard on Desktop */}
+                <span className="hidden sm:inline text-sm">
+                  {tab.label}
+                </span>
+
+                {/* Label - Split on Mobile for narrow screens like Z Fold */}
+                <span className="sm:hidden text-[10px] leading-tight">
+                  {tab.label.split(' ')[0]}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
