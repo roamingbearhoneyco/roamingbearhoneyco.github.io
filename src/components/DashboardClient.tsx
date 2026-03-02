@@ -225,8 +225,9 @@ export default function DashboardClient() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-primary)] mb-2">
             Welcome back, {profile.first_name}!
           </h1>
-          <p className="text-[var(--color-text-secondary)] text-sm sm:text-base">
-            Member since {new Date(profile.created_at).toLocaleDateString()} • Email: <span className="font-semibold">{profile.email}</span>
+          <p className="text-[var(--color-text-secondary)] text-sm sm:text-base flex flex-wrap items-center gap-1 min-w-0">
+            <span className="shrink-0">Member since {new Date(profile.created_at).toLocaleDateString()} • Email:</span>
+            <span className="font-semibold truncate max-w-[200px] sm:max-w-none text-xs sm:text-base" title={profile.email}>{profile.email}</span>
           </p>
         </div>
 
@@ -317,9 +318,9 @@ export default function DashboardClient() {
                     <button onClick={() => setEditingProfile(true)} className="text-[var(--color-secondary)] font-semibold hover:underline">Edit Profile</button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-4 bg-[var(--color-accent)]/5 rounded-lg border border-[var(--color-accent)]/20">
+                    <div className="p-4 bg-[var(--color-accent)]/5 rounded-lg border border-[var(--color-accent)]/20 min-w-0">
                       <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-2">Email Address</p>
-                      <p className="text-lg font-semibold text-[var(--color-text-primary)]">{profile.email}</p>
+                      <p className="text-sm sm:text-lg font-semibold text-[var(--color-text-primary)] truncate" title={profile.email}>{profile.email}</p>
                     </div>
                     <div className="p-4 bg-[var(--color-secondary)]/5 rounded-lg border border-[var(--color-secondary)]/20">
                       <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-2">First Name</p>
