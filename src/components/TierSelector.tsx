@@ -258,8 +258,8 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading: ex
       </div>
 
       {/* Info Text */}
-      <div className="text-center text-sm text-[var(--color-text-secondary)]">
-        <p>All plans include priority member support and access to exclusive content.</p>
+      <div className="text-center text-sm">
+        <p className="text-support-bold">All plans include priority member support and access to exclusive content.</p>
       </div>
     </div>
   );
