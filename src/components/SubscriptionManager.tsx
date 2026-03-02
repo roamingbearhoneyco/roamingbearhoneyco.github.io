@@ -32,7 +32,8 @@ const formatDate = (dateStr: string | null) => {
   });
 };
 
-const getCycleName = (months: number) => {
+const getCycleName = (months: number, tierName?: string) => {
+  if (tierName === 'free') return 'Lifetime';
   if (months === 1) return 'Monthly';
   if (months === 6) return 'Every 6 months';
   if (months === 12) return 'Annually';
@@ -67,7 +68,7 @@ export default function SubscriptionManager({
           
           <div>
             <p className="text-[var(--color-text-secondary)] text-xs uppercase">Billing Cycle</p>
-            <p className="text-sm sm:text-lg font-semibold">{getCycleName(subscription.billing_cycle)}</p>
+            <p className="text-sm sm:text-lg font-semibold">{getCycleName(subscription.billing_cycle, subscription.subscription_tiers.name)}</p>
           </div>
           
           <div>
@@ -82,7 +83,7 @@ export default function SubscriptionManager({
           <div>
             <p className="text-[var(--color-text-secondary)] text-xs uppercase">Next Renewal</p>
             <p className="text-sm sm:text-lg font-semibold">
-              {formatDate(subscription.next_renewal_date)}
+              {subscription.subscription_tiers.name === 'free' ? 'N/A' : formatDate(subscription.next_renewal_date)}
             </p>
             {daysUntilRenewal !== null && daysUntilRenewal > 0 && (
               <p className="text-xs text-[var(--color-text-secondary)]">
