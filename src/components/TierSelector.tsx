@@ -259,7 +259,7 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading: ex
 
       {/* Info Text */}
       <div className="text-center text-sm">
-        <p className="text-support-bold">All plans include priority member support and access to exclusive content.</p>
+        <p className="text-support-bold">All *paid* plans include priority member support and access to exclusive content.</p>
       </div>
     </div>
   );
