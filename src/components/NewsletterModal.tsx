@@ -71,7 +71,7 @@ export default function NewsletterModal({ isOpen, onClose }: NewsletterModalProp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 bg-black/40 backdrop-blur-sm overflow-y-auto animate-in fade-in-0 duration-200">
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center px-4 py-8 bg-black/40 backdrop-blur-sm overflow-y-auto animate-in fade-in-0 duration-200">
       {/* Modal container */}
       <div className="relative w-full max-w-xl rounded-2xl border border-[rgba(215,175,121,0.15)] bg-[rgba(255,255,255,0.95)] backdrop-blur-xl shadow-2xl p-6 sm:p-8 my-8 animate-in zoom-in-95 slide-in-from-top-8 duration-300">
         {/* Close button */}
