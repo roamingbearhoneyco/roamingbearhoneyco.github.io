@@ -66,14 +66,14 @@ export default function OrderHistory({ orders, isLoading = false }: OrderHistory
     <div className="space-y-4">
       {orders.map(order => (
         <div key={order.id} className="card space-y-4">
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
             <div>
-              <p className="text-sm text-[var(--color-text-secondary)]">Order #{order.id}</p>
-              <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">Order #{order.id}</p>
+              <p className="text-sm sm:text-lg font-semibold text-[var(--color-text-primary)]">
                 {formatDate(order.created_at)}
               </p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${getStatusColor(order.status)}`}>
+            <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold capitalize self-start ${getStatusColor(order.status)}`}>
               {order.status}
             </span>
           </div>
@@ -97,7 +97,7 @@ export default function OrderHistory({ orders, isLoading = false }: OrderHistory
           {order.tracking_number && (
             <div className="border-t border-gray-200 pt-4">
               <p className="text-sm text-[var(--color-text-secondary)]">Tracking:</p>
-              <p className="font-mono text-sm">{order.tracking_number}</p>
+              <p className="font-mono text-sm truncate" title={order.tracking_number ?? undefined}>{order.tracking_number}</p>
             </div>
           )}
 

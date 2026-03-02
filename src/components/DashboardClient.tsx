@@ -217,16 +217,19 @@ export default function DashboardClient() {
   ]
 
   return (
-    <div className="px-4 py-8 space-y-6">
+    <div className="px-2 sm:px-4 py-6 sm:py-8 space-y-4 sm:space-y-6">
       {/* Dashboard Header - Constrained to max-w-4xl */}
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Welcome Card */}
-        <div className="card card-grow-in bg-gradient-to-r from-[var(--color-primary)]/10 via-[var(--color-accent)]/10 to-[var(--color-secondary)]/10 border border-[var(--color-accent)]/20">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-primary)] mb-2">
+        <div className="card card-grow-in bg-gradient-to-r from-[var(--color-primary)]/10 via-[var(--color-accent)]/10 to-[var(--color-secondary)]/10 border border-[var(--color-accent)]/20 p-3 sm:p-6">
+          <h1 className="text-2xl sm:text-4xl font-bold text-[var(--color-primary)] mb-1 sm:mb-2">
             Welcome back, {profile.first_name}!
           </h1>
-          <p className="text-[var(--color-text-secondary)] text-sm sm:text-base">
-            Member since {new Date(profile.created_at).toLocaleDateString()} • Email: <span className="font-semibold">{profile.email}</span>
+          <p className="text-[var(--color-text-secondary)] text-xs sm:text-base">
+            Member since {new Date(profile.created_at).toLocaleDateString()}
+          </p>
+          <p className="text-[var(--color-text-secondary)] text-xs sm:text-base truncate min-w-0" title={profile.email}>
+            Email: <span className="font-semibold">{profile.email}</span>
           </p>
         </div>
 
@@ -241,18 +244,20 @@ export default function DashboardClient() {
         )}
 
         {/* Tab Navigation */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 pb-2 border-b-2 border-[var(--color-accent)]/20">
+        <div className="grid grid-cols-4 gap-0.5 sm:gap-1 pb-2 border-b-2 border-[var(--color-accent)]/20">
           {tabList.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-2 sm:px-4 py-3 font-semibold border-b-4 transition-all text-xs sm:text-sm text-center ${
+              className={`px-1 sm:px-4 py-2 sm:py-3 font-semibold border-b-4 transition-all text-[10px] sm:text-sm text-center ${
                 activeTab === tab.id
                   ? 'border-b-[var(--color-secondary)] text-[var(--color-secondary)]'
                   : 'border-b-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]'
               }`}
             >
-              <span className="block sm:inline">{tab.icon} </span><span className="hidden sm:inline">{tab.label}</span><span className="sm:hidden text-xs">{tab.label.split(' ')[0]}</span>
+              <span className="block sm:inline text-base sm:text-sm">{tab.icon}</span>
+              <span className="hidden sm:inline"> {tab.label}</span>
+              <span className="sm:hidden text-[10px] leading-tight block">{tab.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>
@@ -316,14 +321,14 @@ export default function DashboardClient() {
                     <h3 className="text-xl font-bold">Profile Details</h3>
                     <button onClick={() => setEditingProfile(true)} className="text-[var(--color-secondary)] font-semibold hover:underline">Edit Profile</button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-4 bg-[var(--color-accent)]/5 rounded-lg border border-[var(--color-accent)]/20">
-                      <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-2">Email Address</p>
-                      <p className="text-lg font-semibold text-[var(--color-text-primary)]">{profile.email}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="p-3 sm:p-4 bg-[var(--color-accent)]/5 rounded-lg border border-[var(--color-accent)]/20 min-w-0">
+                      <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-1 sm:mb-2">Email Address</p>
+                      <p className="text-sm sm:text-lg font-semibold text-[var(--color-text-primary)] truncate" title={profile.email}>{profile.email}</p>
                     </div>
-                    <div className="p-4 bg-[var(--color-secondary)]/5 rounded-lg border border-[var(--color-secondary)]/20">
-                      <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-2">First Name</p>
-                      <p className="text-lg font-semibold text-[var(--color-text-primary)]">{profile.first_name || 'Not set'}</p>
+                    <div className="p-3 sm:p-4 bg-[var(--color-secondary)]/5 rounded-lg border border-[var(--color-secondary)]/20">
+                      <p className="text-xs uppercase text-[var(--color-text-secondary)] font-bold mb-1 sm:mb-2">First Name</p>
+                      <p className="text-sm sm:text-lg font-semibold text-[var(--color-text-primary)]">{profile.first_name || 'Not set'}</p>
                     </div>
                   </div>
                   <div className="pt-4 border-t">
@@ -335,7 +340,7 @@ export default function DashboardClient() {
                           type="button"
                           onClick={() => handleMerchToggle(item)}
                           disabled={savingMerch !== null}
-                          className={`p-4 border-2 rounded-lg font-semibold transition-all duration-300 text-center relative ${
+                          className={`p-3 sm:p-4 border-2 rounded-lg font-semibold transition-all duration-300 text-center relative text-sm sm:text-base ${
                             profile.merch_preferences?.includes(item)
                               ? 'border-[var(--color-secondary)] bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] shadow-lg shadow-[var(--color-secondary)]/50'
                               : 'border-[var(--color-accent)]/30 bg-white text-[var(--color-text-primary)] hover:border-[var(--color-secondary)]/50 hover:bg-[var(--color-accent)]/5'

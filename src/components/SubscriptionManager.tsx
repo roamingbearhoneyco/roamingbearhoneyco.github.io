@@ -57,22 +57,22 @@ export default function SubscriptionManager({
       <div className="card space-y-4">
         <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Current Subscription</h3>
         
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
           <div>
             <p className="text-[var(--color-text-secondary)] text-xs uppercase">Tier</p>
-            <p className="text-lg font-semibold text-[var(--color-primary)]">
+            <p className="text-sm sm:text-lg font-semibold text-[var(--color-primary)]">
               {subscription.subscription_tiers.display_name}
             </p>
           </div>
           
           <div>
             <p className="text-[var(--color-text-secondary)] text-xs uppercase">Billing Cycle</p>
-            <p className="text-lg font-semibold">{getCycleName(subscription.billing_cycle)}</p>
+            <p className="text-sm sm:text-lg font-semibold">{getCycleName(subscription.billing_cycle)}</p>
           </div>
           
           <div>
             <p className="text-[var(--color-text-secondary)] text-xs uppercase">Status</p>
-            <p className={`text-lg font-semibold capitalize ${
+            <p className={`text-sm sm:text-lg font-semibold capitalize ${
               subscription.status === 'active' ? 'text-green-600' : 'text-orange-600'
             }`}>
               {subscription.status}
@@ -81,7 +81,7 @@ export default function SubscriptionManager({
           
           <div>
             <p className="text-[var(--color-text-secondary)] text-xs uppercase">Next Renewal</p>
-            <p className="text-lg font-semibold">
+            <p className="text-sm sm:text-lg font-semibold">
               {formatDate(subscription.next_renewal_date)}
             </p>
             {daysUntilRenewal !== null && daysUntilRenewal > 0 && (

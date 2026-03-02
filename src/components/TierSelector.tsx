@@ -124,7 +124,7 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading: ex
       )}
 
       {/* Billing Cycle Selector */}
-      <div className="flex justify-center gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3">
         {[
           { value: 1, label: 'Monthly' },
           { value: 6, label: '6 Months', discount: '15% off' },
@@ -133,7 +133,7 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading: ex
           <button
             key={option.value}
             onClick={() => setSelectedCycle(option.value)}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all ${
               selectedCycle === option.value
                 ? 'bg-[var(--color-secondary)] text-white shadow-lg'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -146,7 +146,7 @@ export default function TierSelector({ currentTierName, onUpgrade, isLoading: ex
       </div>
 
       {/* Tier Cards Grid - Responsive Grid Layout */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 max-w-7xl mx-auto px-1 sm:px-4 lg:px-8 transition-all">
         {tiers.map((tier, index) => {
           const isMiddle = isMiddleTier(index);
           const isCurrent = tier.name === currentTierName;
